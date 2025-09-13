@@ -2,6 +2,7 @@ import Header from '@/components/Header'
 import './globals.css'
 import React from 'react'
 import Footer from '@/components/Footer'
+import { CartProvider } from '@/providers/CartProvider'
 
 
 export const metadata = {
@@ -17,13 +18,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">
-   
-        <Header />
+        <CartProvider>
+          <Header />
 
-        <main>{children}</main>
+          <main>{children}</main>
 
-      
-        <Footer />
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   )

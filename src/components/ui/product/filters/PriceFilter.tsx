@@ -6,7 +6,7 @@ export interface PriceFilterProps {
   maxPrice: number | "";
   onChangeMin: (val: number | "") => void;
   onChangeMax: (val: number | "") => void;
-  onApply: () => void;
+  onApply?: () => void;
 }
 
 const PriceFilter: React.FC<PriceFilterProps> = ({
@@ -14,7 +14,6 @@ const PriceFilter: React.FC<PriceFilterProps> = ({
   maxPrice,
   onChangeMin,
   onChangeMax,
-  onApply,
 }) => {
   return (
     <div className="space-y-3">
@@ -29,29 +28,26 @@ const PriceFilter: React.FC<PriceFilterProps> = ({
               const v = e.target.value;
               onChangeMin(v === '' ? '' : Number(v));
             }}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none "
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
           />
         </div>
         <div className="flex-1">
           <label className="block text-xs text-gray-600 mb-1">Max Price</label>
           <input
             type="number"
-            placeholder="1000"
+            placeholder="3000"
             value={maxPrice}
             onChange={(e) => {
-              const v = e.target.value;
-              onChangeMax(v === '' ? '' : Number(v));
+              let v = e.target.value;
+              // maksimum 3000 yoxlaması
+              let num: number | "" = v === '' ? '' : Number(v);
+              if (typeof num === "number" && num > 3000) num = 3000;
+              onChangeMax(num);
             }}
-            className="w-full border border-gray-300 outline-none rounded-lg px-3 py-2 text-sm "
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
           />
         </div>
       </div>
-      <button
-        onClick={onApply}
-        className="w-full bg-black text-white py-2 px-4 rounded-lg text-sm font-medium"
-      >
-        Apply Price Filter
-      </button>
     </div>
   );
 };

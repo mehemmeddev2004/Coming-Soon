@@ -1,10 +1,12 @@
 import React from 'react';
 import Header from '../components/Header'; // Header komponentinin path-i
 import Footer from '../components/Footer'; // Footer komponentinin path-i
-import Kampaniya from '../components/Kampaniya';
-import NewIn from '../components/NewIn';
-import NewSeason from '../components/NewSeason';
-import Pay from '../components/Pay';
+import Kampaniya from '../components/main/Kampaniya';
+import NewIn from '../components/main/NewIn';
+import NewSeason from '../components/main/NewSeason';
+import Sneakers from '@/components/main/Sneakers';
+import Koynekler from '@/components/main/Koynekler';
+
 
 const Page = () => {
   return (
@@ -15,7 +17,9 @@ const Page = () => {
         <Kampaniya />
         <NewIn />
         <NewSeason />
-        <Pay />
+        <Sneakers/>
+        <Koynekler/>
+
       </main>
 
    

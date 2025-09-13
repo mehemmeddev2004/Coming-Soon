@@ -21,10 +21,13 @@ const items = {
   }
 }
 
+
+
 const NewSeason = () => {
+  
   return (
-    <div className="px-4 lg:px-8 max-w-[1280px] mx-auto">
-      <span className="block text-2xl md:text-3xl text-center font-semibold uppercase tracking-wide font-sans mb-8 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+    <div className="pl-[10px] max-w-[1280px] mx-auto">
+      <span className="block text-[24px] text-center font-semibold uppercase tracking-wide font-sans mb-8 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
        Yeni mövsüm / Yeniliklər
       </span>
 

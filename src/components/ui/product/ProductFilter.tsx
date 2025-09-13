@@ -52,8 +52,10 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
           handleFilterChange ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="sticky top-0 bg-white border-b px-4 py-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Filter & Sort</h2>
+        <div className="sticky top-0 bg-white px-4 py-4 flex justify-between items-center">
+          <div>
+            <h2>Filter & Sortc</h2>
+          </div>
           <button
             onClick={handleFilterToggle}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
