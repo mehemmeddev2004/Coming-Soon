@@ -1,0 +1,52 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
+  },
+  // Video optimization
+  webpack: (config: any) => {
+    config.module.rules.push({
+      test: /\.(mp4|webm|ogg|swf|ogv)$/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          publicPath: '/_next/static/videos/',
+          outputPath: 'static/videos/',
+        },
+      },
+    });
+    return config;
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        destination: 'https://etor.onrender.com/api/auth/:path*',
+      },
+      {
+        source: '/api/category/:path*',
+        destination: 'https://etor.onrender.com/api/category/:path*',
+      },
+      {
+        source: '/api/categories/:path*',
+        destination: 'https://etor.onrender.com/api/categories/:path*',
+      },
+      {
+        source: '/api/products/:path*',
+        destination: 'https://etor.onrender.com/api/products/:path*',
+      },
+      {
+        source: '/api/upload/:path*',
+        destination: 'https://etor.onrender.com/api/upload/:path*',
+      },
+    ];
+  },
+};
+
+export default nextConfig;
