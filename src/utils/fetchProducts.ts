@@ -138,7 +138,7 @@ export const getProductById = async (id: string | number): Promise<Product | nul
           
           if (allProducts.length > 0) {
             // Try to find product by ID match
-            const matchedProduct = allProducts.find(p => p.id === Number(id))
+            const matchedProduct = allProducts.find(p => p.id.toString() === id.toString())
             if (matchedProduct) {
               console.log(`✅ Found matching product: ${matchedProduct.name} (ID: ${matchedProduct.id})`)
               return matchedProduct
