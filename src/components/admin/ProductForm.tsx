@@ -38,6 +38,7 @@ interface ProductFormProps {
       slug: string
       description: string
       img: string
+      images?: string
       price: number
       stock: number
       category: string
@@ -70,20 +71,10 @@ interface ProductFormProps {
   setProductVariants: React.Dispatch<React.SetStateAction<Variant[]>>
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({
-  show,
-  onClose,
-  onSubmit,
-  newProduct,
-  setNewProduct,
-  categories,
-  productSpecs,
-  setProductSpecs,
-  productVariants,
-  setProductVariants
-}) => {
-  const [isUploading, setIsUploading] = useState(false)
+const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newProduct, setNewProduct, categories, productSpecs, setProductSpecs, productVariants, setProductVariants }) => {
   const [isImageUploading, setIsImageUploading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [additionalImages, setAdditionalImages] = useState<string[]>([])
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
 
   // Upload image using the correct API endpoint
@@ -205,13 +196,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
     // 👇 Artıq məlumatları `onSubmit`-ə göndəririk
     const success = await onSubmit({
-      product: newProduct,
+      product: {
+        ...newProduct,
+        images: additionalImages.length > 0 ? JSON.stringify(additionalImages) : undefined
+      },
       specs: productSpecs,
       variants: productVariants
     })
 
     if (success) {
       setMessage({ type: 'success', text: 'Məhsul uğurla əlavə edildi!' })
+      // Reset additional images
+      setAdditionalImages([])
       setTimeout(() => {
         onClose()
         setMessage(null)
@@ -357,6 +353,73 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 }}
               />
             )}
+          </div>
+
+          {/* Additional Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Əlavə Şəkillər</label>
+            <div className="space-y-3">
+              <input 
+                type="file" 
+                accept="image/*"
+                multiple
+                disabled={isImageUploading}
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files || [])
+                  if (files.length > 0) {
+                    setMessage({ type: 'success', text: `${files.length} şəkil yüklənir...` })
+                    
+                    const uploadPromises = files.map(async (file) => {
+                      if (file.size > 10 * 1024 * 1024) {
+                        console.error('File too large:', file.name)
+                        return null
+                      }
+                      return await uploadImage(file)
+                    })
+                    
+                    const uploadedUrls = await Promise.all(uploadPromises)
+                    const validUrls = uploadedUrls.filter(url => url !== null) as string[]
+                    
+                    if (validUrls.length > 0) {
+                      setAdditionalImages(prev => [...prev, ...validUrls])
+                      setMessage({ type: 'success', text: `${validUrls.length} şəkil uğurla yükləndi!` })
+                    }
+                    
+                    e.target.value = ''
+                  }
+                }}
+                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors ${
+                  isImageUploading ? 'opacity-50 cursor-not-allowed' : ''
+                }`} 
+              />
+              <div className="text-sm text-gray-500">
+                Birdən çox şəkil seçə bilərsiniz. Maksimum fayl ölçüsü: 10MB.
+              </div>
+              
+              {/* Additional Images Preview */}
+              {additionalImages.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-3">
+                  {additionalImages.map((imageUrl, index) => (
+                    <div key={index} className="relative">
+                      <img 
+                        src={imageUrl} 
+                        alt={`Additional ${index + 1}`} 
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdditionalImages(prev => prev.filter((_, i) => i !== index))
+                        }}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 transition-colors"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Price & Stock */}

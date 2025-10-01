@@ -43,7 +43,7 @@ const queryString = new URLSearchParams(filters).toString()
   }
 
   return (
-    <div className="mx-auto flex flex-col w-full h-[650px] px-4 py-8">
+    <div className="mx-auto flex flex-col w-full h-[850px] mb-[30px] px-4 py-8">
     
       <span className="block text-[24px] text-center font-semibold uppercase tracking-wide font-sans mb-[40px] bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
         Yeni Gələnlər

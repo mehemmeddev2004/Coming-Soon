@@ -9,7 +9,6 @@ export async function GET(
   
   try {
     const { id } = await params;
-    console.log('📤 Product ID:', id);
     
     const response = await fetch(`https://etor.onrender.com/api/products/${id}`, {
       method: 'GET',
@@ -27,7 +26,6 @@ export async function GET(
     let data;
     try {
       data = JSON.parse(responseText);
-      console.log('✅ Product data:', data);
     } catch (parseError) {
       console.error('❌ Failed to parse JSON:', parseError);
       return NextResponse.json(
@@ -162,10 +160,7 @@ export async function DELETE(
       headers,
     });
 
-    console.log('📥 Backend response status:', response.status);
-    
     const responseText = await response.text();
-    console.log('📥 Raw response:', responseText);
     
     let data;
     try {

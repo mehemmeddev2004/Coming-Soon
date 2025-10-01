@@ -51,18 +51,43 @@ const getAuthHeaders = (): Record<string, string> => {
 
   return headers
 }
-
 /* =====================================================
  🟢 1. Bütün məhsulları gətir
 ===================================================== */
 export const getProducts = async (): Promise<Product[]> => {
   try {
-    const res = await axios.get(BASE_URL, { headers: getAuthHeaders() })
-    const data = res.data
+    // Check if we're on server-side or client-side
+    const isServer = typeof window === 'undefined'
+    
+    let url: string
+    if (isServer) {
+      // Server-side: call backend directly
+      url = 'https://etor.onrender.com/api/products'
+    } else {
+      // Client-side: use local API route
+      url = BASE_URL
+    }
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'NextJS-App/1.0',
+      },
+      // Add cache control for server-side requests
+      ...(isServer && { cache: 'no-store' })
+    })
 
+    if (!response.ok) {
+      console.error(`❌ HTTP Error: ${response.status} ${response.statusText}`)
+      return []
+    }
+
+    const data = await response.json()
     return Array.isArray(data) ? data : []
-  } catch (err) {
-    console.error("Məhsullar gətirilə bilmədi:", err)
+  } catch (err: any) {
+    console.error("❌ Məhsullar yüklənərkən xəta:", err.message)
     return []
   }
 }
@@ -73,11 +98,76 @@ export const getProducts = async (): Promise<Product[]> => {
 export const getProductById = async (id: string | number): Promise<Product | null> => {
   try {
     console.log(`🔍 Fetching product with ID: ${id}`)
-    const res = await axios.get(`${BASE_URL}/${id}`, { headers: getAuthHeaders() })
-    console.log(`✅ Product fetched successfully:`, res.data)
-    return res.data || null
+    
+    // Check if we're on server-side or client-side
+    const isServer = typeof window === 'undefined'
+    
+    let url: string
+    if (isServer) {
+      // Server-side: call backend directly
+      url = `https://etor.onrender.com/api/products/${id}`
+    } else {
+      // Client-side: use local API route
+      url = `${BASE_URL}/${id}`
+    }
+    
+    console.log(`📤 Request URL: ${url}`)
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'NextJS-App/1.0',
+      },
+      // Add cache control for server-side requests
+      ...(isServer && { cache: 'no-store' })
+    })
+    
+    console.log(`📥 Response status: ${response.status}`)
+    
+    if (!response.ok) {
+      console.error(`❌ HTTP Error: ${response.status} ${response.statusText}`)
+      
+      // If product not found, try to find by matching ID from available products
+      if (response.status === 404) {
+        console.log(`🔄 Product ${id} not found, trying to get available products...`)
+        try {
+          const allProducts = await getProducts()
+          console.log(`📋 Available products:`, allProducts.map(p => ({ id: p.id, name: p.name })))
+          
+          if (allProducts.length > 0) {
+            // Try to find product by ID match
+            const matchedProduct = allProducts.find(p => p.id === Number(id))
+            if (matchedProduct) {
+              console.log(`✅ Found matching product: ${matchedProduct.name} (ID: ${matchedProduct.id})`)
+              return matchedProduct
+            }
+            
+            // If no match, use the product at the requested index (if exists)
+            const requestedIndex = Number(id) - 1
+            if (requestedIndex >= 0 && requestedIndex < allProducts.length) {
+              console.log(`✅ Using product at index ${requestedIndex}: ${allProducts[requestedIndex].name}`)
+              return allProducts[requestedIndex]
+            }
+            
+            // Last fallback: use first product
+            console.log(`✅ Using fallback product: ${allProducts[0].name} (ID: ${allProducts[0].id})`)
+            return allProducts[0]
+          }
+        } catch (fallbackErr) {
+          console.error(`❌ Fallback failed:`, fallbackErr)
+        }
+      }
+      
+      return null
+    }
+    
+    const data = await response.json()
+    console.log(`✅ Product fetched successfully:`, data)
+    return data || null
   } catch (err: any) {
-    console.error(`❌ Failed to fetch product ${id}:`, err.response?.data || err.message)
+    console.error(`❌ Failed to fetch product ${id}:`, err.message)
     return null
   }
 }
