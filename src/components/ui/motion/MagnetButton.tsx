@@ -91,22 +91,17 @@ const MagnetButton: React.FC<MagnetButtonProps> = ({
         rounded-lg
         transition-colors
     
-     
+        hover:text-black
         hover:bg-white
-        hover:text-orange-500
+        hover:text to-black
         hover:border-1
-        hover:border-orange-600
+     
       
-       bg-orange-500
+       bg-black
        text-white
         max-[991px]:border-none
         duration-300
         shadow-lg
-        hover:shadow-xl
-        focus-visible:outline-none
-        focus-visible:ring-2
-        focus-visible:ring-amber-500
-        focus-visible:ring-offset-2
      
         ${sizeClasses[size]}
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}

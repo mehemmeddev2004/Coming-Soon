@@ -92,8 +92,7 @@ const Kampaniya = () => {
                 className="
                   absolute inset-0
                   flex flex-col items-start justify-center
-                  text-orange-600
-                  pointer-events-none
+                  text-gray-800                 pointer-events-none
                   px-6 sm:px-10 md:px-20 lg:px-24
                   top-32
                   max-[991px]:items-center
