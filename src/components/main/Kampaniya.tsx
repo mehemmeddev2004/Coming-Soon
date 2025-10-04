@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react"
 import "swiper/css"
 import MagnetButton from "../ui/motion/MagnetButton"
 import BlurText from "../ui/motion/BlurText"
+import Link from "next/link" // ✅ Düzgün import
 
 const Kampaniya = () => {
   const [hasPlayed, setHasPlayed] = useState(false)
@@ -27,7 +28,7 @@ const Kampaniya = () => {
   const handleSlideChange = (swiper: any) => {
     const currentIndex = swiper.activeIndex
 
-    // Tüm videoları durdur
+    // 🔇 Bütün videoları dayandır
     videoRefs.current.forEach((video) => {
       if (video) {
         video.pause()
@@ -35,7 +36,7 @@ const Kampaniya = () => {
       }
     })
 
-    // Aktif slide'daki videoyu başlat
+    // ▶️ Aktiv olan videonu oynat
     const activeVideo = videoRefs.current[currentIndex]
     if (activeVideo) activeVideo.play()
   }
@@ -63,7 +64,7 @@ const Kampaniya = () => {
         {items.map((item, index) => (
           <SwiperSlide key={item.id}>
             <div className="relative flex justify-center">
-              {/* Video */}
+              {/* 🎥 Video */}
               <video
                 ref={(el) => {
                   if (el) videoRefs.current[index] = el
@@ -81,18 +82,18 @@ const Kampaniya = () => {
                 Your browser does not support the video tag.
               </video>
 
-              {/* Overlay yuxarı */}
+              {/* 🟣 Overlay yuxarı */}
               <div className="absolute top-0 left-0 w-full h-1/4 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
 
-              {/* Overlay aşağı */}
+              {/* 🟣 Overlay aşağı */}
               <div className="absolute bottom-0 left-0 w-full h-1/4 max-[991px]:h-2/3 bg-gradient-to-t from-black/20 max-[991px]:from-black/60 to-transparent pointer-events-none" />
 
-              {/* Text & Button */}
+              {/* 🧠 Text & Button */}
               <div
                 className="
                   absolute inset-0
                   flex flex-col items-start justify-center
-                  text-gray-800                 pointer-events-none
+                  text-gray-800 pointer-events-none
                   px-6 sm:px-10 md:px-20 lg:px-24
                   top-32
                   max-[991px]:items-center
@@ -115,16 +116,19 @@ const Kampaniya = () => {
                     />
                   </h2>
 
+                  {/* 🧲 Button */}
                   <div className="pointer-events-auto">
-                    <MagnetButton
-                      padding={80}
-                      disabled={false}
-                      magnetStrength={0.4}
-                      size="lg"
-                      onClick={() => console.log("Button clicked!")}
-                    >
-                      {item.btn}
-                    </MagnetButton>
+                    <Link href={item.slug}>
+                      <MagnetButton
+                        padding={80}
+                        disabled={false}
+                        magnetStrength={0.4}
+                        size="lg"
+                        onClick={() => console.log("Button clicked! ✅")}
+                      >
+                        {item.btn}
+                      </MagnetButton>
+                    </Link>
                   </div>
                 </div>
               </div>

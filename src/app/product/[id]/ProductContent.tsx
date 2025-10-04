@@ -3,13 +3,14 @@
 import { useState } from "react"
 import ProductGallery from "@/components/ui/product/ProductGallery"
 import AddToCartButton from "@/components/ui/button/AddToCartButton"
+import { Product } from "@/types/product"
 
 const sizes = ["X-Small", "Small", "Medium", "Large", "X-Large", "XX-Large"]
 const desc = ["Description", "Sizing", "Shipping", "Returns"]
 
 interface ProductContentProps {
-  product: any
-  galleryImages: Array<{ id: string; url: string }>
+  product: Product
+  galleryImages: { id: string; url: string }[]
   mainImage: string
 }
 
@@ -28,27 +29,35 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
           {/* Title & Price */}
           <div>
             <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">{product.name}</h1>
-            <p className="text-xl font-medium text-gray-900">{product.price} AZN</p>
+            <p className="text-xl font-medium text-gray-900">
+              {typeof product.price === 'string' 
+                ? product.price.startsWith('AZN') 
+                  ? product.price 
+                  : `${product.price} AZN`
+                : `${product.price} AZN`}
+            </p>
           </div>
 
-          {/* Specs */}
-          {product.specs?.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2">
-              {product.specs.flatMap((spec: any) =>
-                spec.values.map((v: any) => (
-                  <span key={v.id} className="px-3 py-1 text-sm text-gray-700">
-                    {v.value}
-                  </span>
-                )),
-              )}
-            </div>
+       {/* Specs */}
+      {product.specs && product.specs.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2">
+          {product.specs.flatMap(spec => 
+            spec?.values?.map(value => (
+              <span 
+                key={`${spec?.id ?? ''}-${value?.id ?? ''}`} 
+                className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-md"
+              >
+                {value?.value ?? ''}
+              </span>
+            ))
           )}
+        </div>
+      )}
 
           {/* Size Selector */}
           <div>
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-sm font-medium text-gray-900">Select a size</h3>
-              <button className="text-sm text-gray-600 hover:text-gray-900 underline">Size guide</button>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
@@ -67,9 +76,10 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
           <AddToCartButton
             id={String(product.id)}
             name={product.name}
-            price={product.price}
-            imageUrl={mainImage}
-            className="w-full h-12 bg-black hover:bg-gray-800 text-white font-medium rounded-md transition-colors"
+            price={typeof product.price === 'string' 
+              ? product.price.replace(/[^0-9.,]/g, '') // Remove any non-numeric characters except decimal point
+              : product.price}
+            className="w-full h-12 bg-black hover:bg-gray-800 text-white font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Add To Cart
           </AddToCartButton>
@@ -97,7 +107,7 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
                   {product.description ? (
                     Array.isArray(product.description) ? (
                       <ul className="list-disc pl-5 space-y-1">
-                        {product.description.map((line: string, idx: number) => (
+                        {product.description.map((line, idx) => (
                           <li key={idx}>{line}</li>
                         ))}
                       </ul>
@@ -112,11 +122,6 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
               {activeTab === "Sizing" && (
                 <div>
                   <p>Size guide məlumatları burada olacaq.</p>
-                  {product.specs && product.specs.length > 0 && (
-                    <div className="mt-4">
-                      
-                    </div>
-                  )}
                 </div>
               )}
               {activeTab === "Shipping" && <p>Shipping details burada olacaq.</p>}

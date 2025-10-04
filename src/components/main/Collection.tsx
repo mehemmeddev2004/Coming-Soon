@@ -11,7 +11,7 @@ const Collection = () => {
   ]
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4">
+    <div className="max-w-[1400px] max-[991px]:w-full mx-auto px-4">
       <span className="block text-[24px] text-center font-semibold uppercase tracking-wide font-sans mb-10 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
         Bizim Kolleksiyalarımız
       </span>

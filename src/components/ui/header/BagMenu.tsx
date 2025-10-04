@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useCart } from "@/providers/CartProvider";
 
 const BagMenu = () => {
-  const { items, total, removeItem, clear } = useCart();
+  const { items, totalPrice: total, removeItem, clearCart: clear } = useCart();
 
   return (
     <div className="w-[360px] max-h-[420px] bg-white shadow-xl rounded-md z-50 p-4 border border-gray-100">
@@ -37,7 +38,7 @@ const BagMenu = () => {
                   <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
                 </div>
                 <div className="text-sm font-semibold whitespace-nowrap">
-                  {(item.price * item.quantity).toFixed(2)} AZN
+                  {(item.price * (item.quantity || 1)).toFixed(2)} AZN
                 </div>
                 <button
                   className="ml-2 text-xs text-gray-400 hover:text-red-600"
@@ -62,12 +63,12 @@ const BagMenu = () => {
             >
               Clear
             </button>
-            <a
+            <Link
               href="/Basket"
               className="flex-1 h-9 bg-black text-white text-sm rounded flex items-center justify-center hover:bg-gray-900"
             >
               View Cart
-            </a>
+            </Link>
           </div>
         </div>
       )}
