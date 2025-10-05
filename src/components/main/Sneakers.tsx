@@ -44,7 +44,7 @@ const Sneakers = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-1/2">
-          <img src="/img/sneaker.jpeg" alt="Sneaker Banner" className="w-full aspect-[3/2] object-cover rounded-lg" />
+          <img src="/img/sneaker.jpeg" alt="Sneaker Banner" className="w-full aspect-[3/2] h-[520px] rounded-lg" />
         </div>
 
         <div className="w-full lg:w-1/2 rounded-lg flex flex-col gap-4">

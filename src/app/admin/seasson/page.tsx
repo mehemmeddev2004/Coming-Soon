@@ -1,16 +1,25 @@
 "use client"
-import React, { useState, useEffect } from 'react'
-import { getAllSeasons, getSeasonsByProduct } from '@/utils/fetchSeasons'
+import React, { useState } from 'react'
+import { useSeasons, useSeasonsByProduct } from '@/hooks/useApiCache'
 import { getProducts } from '@/utils/fetchProducts'
 import { Season, SeasonType } from '@/types/season'
 import { Product } from '@/types/product'
+import { LoadingSpinner, SkeletonCard } from '@/components/ui/LoadingSpinner'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const SeasonsPage = () => {
-  const [seasons, setSeasons] = useState<Season[]>([])
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState<number | "all">("all")
-  const [error, setError] = useState<string | null>(null)
+  
+  // Use optimized hooks with caching
+  const { 
+    data: seasons = [], 
+    isLoading, 
+    error, 
+    refetch 
+  } = selectedProduct === "all" 
+    ? useSeasons() 
+    : useSeasonsByProduct(selectedProduct as number)
 
   // Season type labels in Azerbaijani
   const getSeasonTypeLabel = (seasonType: SeasonType): string => {
@@ -23,57 +32,23 @@ const SeasonsPage = () => {
     return labels[seasonType] || seasonType
   }
 
-  // Fetch all data
-  const fetchData = async () => {
+  // Fetch products (seasons are handled by React Query)
+  const fetchProducts = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      
-      const [seasonsData, productsData] = await Promise.all([
-        getAllSeasons(),
-        getProducts()
-      ])
-      
-      setSeasons(Array.isArray(seasonsData) ? seasonsData : [])
+      const productsData = await getProducts()
       setProducts(Array.isArray(productsData) ? productsData : [])
     } catch (error: any) {
-      console.error('Error fetching data:', error)
-      setError(error.message || 'Məlumatlar yüklənmədi')
-      setSeasons([]) // Ensure seasons is always an array
+      console.error('Error fetching products:', error)
       setProducts([])
-    } finally {
-      setLoading(false)
     }
   }
 
-  // Filter seasons by product
-  const filterSeasonsByProduct = async (productId: number | "all") => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      if (productId === "all") {
-        const allSeasons = await getAllSeasons()
-        setSeasons(Array.isArray(allSeasons) ? allSeasons : [])
-      } else {
-        const productSeasons = await getSeasonsByProduct(productId)
-        setSeasons(Array.isArray(productSeasons) ? productSeasons : [])
-      }
-    } catch (error: any) {
-      console.error('Error filtering seasons:', error)
-      setError(error.message || 'Sezonlar yüklənmədi')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchData()
+  React.useEffect(() => {
+    fetchProducts()
   }, [])
 
   const handleProductFilter = (productId: number | "all") => {
     setSelectedProduct(productId)
-    filterSeasonsByProduct(productId)
   }
 
   // Get product name from season
@@ -84,19 +59,29 @@ const SeasonsPage = () => {
     return "Məhsul tapılmadı"
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Sezonlar yüklənir...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-8">
+              <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-64 animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -106,7 +91,7 @@ const SeasonsPage = () => {
               <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Məhsul sezonlarını idarə edin</p>
             </div>
             <button
-              onClick={fetchData}
+              onClick={() => refetch()}
               className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
             >
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -120,11 +105,21 @@ const SeasonsPage = () => {
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
-              <div className="flex items-center">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/>
-                </svg>
-                <span className="text-red-800 font-medium text-sm sm:text-base">{error}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/>
+                  </svg>
+                  <span className="text-red-800 font-medium text-sm sm:text-base">
+                    {error instanceof Error ? error.message : 'Məlumatlar yüklənmədi'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => refetch()}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                >
+                  Yenidən cəhd et
+                </button>
               </div>
             </div>
           )}
@@ -196,6 +191,7 @@ const SeasonsPage = () => {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   )
 }
 

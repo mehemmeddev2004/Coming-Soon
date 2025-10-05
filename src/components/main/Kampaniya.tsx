@@ -75,7 +75,7 @@ const Kampaniya = () => {
                 playsInline
                 disablePictureInPicture
                 {...({ controlsList: "nodownload nofullscreen noremoteplayback" } as any)}
-                className="w-full object-cover h-[780px] sm:h-[900px] md:h-[900px] lg:h-[95vh]"
+                className="w-full object-cover h-[780px] sm:h-[900px] md:h-[900px] lg:h-[100vh]"
                 style={{ pointerEvents: "none" }}
               >
                 <source src={item.url} type="video/mp4" />
@@ -93,7 +93,7 @@ const Kampaniya = () => {
                 className="
                   absolute inset-0
                   flex flex-col items-start justify-center
-                  text-gray-800 pointer-events-none
+                  text-gray-600 pointer-events-none
                   px-6 sm:px-10 md:px-20 lg:px-24
                   top-32
                   max-[991px]:items-center

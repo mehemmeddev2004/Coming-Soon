@@ -35,7 +35,7 @@ const Footer = () => {
 
   return (
     <footer>
-      <div className="w-full min-h-[40vh] flex flex-col px-[15px] bg-[#F8F8F9]">
+      <div className="w-full min-h-[40vh] flex flex-col px-[15px] bg-black text-white">
         <div className="max-w-[1286px] w-full mx-auto py-8">
          
           <h2 className="text-lg font-semibold mb-4">Top Catégories</h2>
@@ -46,7 +46,7 @@ const Footer = () => {
               <a
                 key={index}
                 href="#"
-                className="text-gray-600 hover:text-black transition-colors"
+                className="text-white hover:text-black transition-colors"
               >
                 {cat}
               </a>

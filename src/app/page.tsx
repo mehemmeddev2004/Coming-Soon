@@ -1,5 +1,6 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import About from "@/components/main/About";
 import Collection from "@/components/main/Collection";
 import Instagram from "@/components/main/Instagram";
 import Kampaniya from "@/components/main/Kampaniya";
@@ -21,6 +22,7 @@ export default function Home() {
         <Sneakers/>
         <Koynekler/>
         <Collection/>
+        <About/>
         <Instagram/>
       </main>
 

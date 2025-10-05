@@ -2,16 +2,51 @@ import axios from "axios"
 import { CreateSeasonData, Season, SeasonType } from "@/types/season"
 
 const BASE_URL = "/api/new-season"
+const REQUEST_TIMEOUT = 10000 // 10 seconds
+const MAX_RETRIES = 3
 
-// Helper function to get authentication headers
-const getAuthHeaders = (): Record<string, string> => {
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token")
-    if (token) headers["Authorization"] = `Bearer ${token}`
+// Create axios instance with default config
+const apiClient = axios.create({
+  timeout: REQUEST_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// Add request interceptor for auth
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
   }
-  return headers
+  return config
+})
+
+// Retry helper function
+const retryRequest = async <T>(
+  requestFn: () => Promise<T>,
+  retries = MAX_RETRIES,
+  delay = 1000
+): Promise<T> => {
+  try {
+    return await requestFn()
+  } catch (error) {
+    if (retries > 0 && axios.isAxiosError(error)) {
+      // Don't retry on 4xx errors (client errors)
+      if (error.response?.status && error.response.status >= 400 && error.response.status < 500) {
+        throw error
+      }
+      
+      console.log(`Retrying request... ${MAX_RETRIES - retries + 1}/${MAX_RETRIES}`)
+      await new Promise(resolve => setTimeout(resolve, delay))
+      return retryRequest(requestFn, retries - 1, delay * 2)
+    }
+    throw error
+  }
 }
+
 
 // Export SeasonType enum
 export { SeasonType }
@@ -20,39 +55,45 @@ export { SeasonType }
  🟢 1. Get all seasons
 ===================================================== */
 export const getAllSeasons = async (): Promise<Season[]> => {
-  try {
-    const res = await axios.get(BASE_URL, { headers: getAuthHeaders() })
-    return Array.isArray(res.data) ? res.data : []
-  } catch (err: unknown) {
-    console.error("Error fetching all seasons:", err)
-    return []
-  }
+  return retryRequest(async () => {
+    try {
+      const res = await apiClient.get(BASE_URL)
+      return Array.isArray(res.data) ? res.data : []
+    } catch (err: unknown) {
+      console.error("Error fetching all seasons:", err)
+      return []
+    }
+  })
 }
 
 /* =====================================================
  🟢 2. Get seasons by product
 ===================================================== */
 export const getSeasonsByProduct = async (productId: number): Promise<Season[]> => {
-  try {
-    const res = await axios.get(`${BASE_URL}/${productId}`, { headers: getAuthHeaders() })
-    return Array.isArray(res.data) ? res.data : []
-  } catch (err: unknown) {
-    console.error(`Error fetching seasons for product ${productId}:`, err)
-    return []
-  }
+  return retryRequest(async () => {
+    try {
+      const res = await apiClient.get(`${BASE_URL}/${productId}`)
+      return Array.isArray(res.data) ? res.data : []
+    } catch (err: unknown) {
+      console.error(`Error fetching seasons for product ${productId}:`, err)
+      return []
+    }
+  })
 }
 
 /* =====================================================
  🟢 3. Create new season for a product
 ===================================================== */
 export const createSeason = async (productId: number, seasonData: CreateSeasonData): Promise<Season | null> => {
-  try {
-    const res = await axios.post(`${BASE_URL}/${productId}`, seasonData, { headers: getAuthHeaders() })
-    return res.data?.data || res.data || null
-  } catch (err: unknown) {
-    console.error(`Error creating season for product ${productId}:`, err)
-    return null
-  }
+  return retryRequest(async () => {
+    try {
+      const res = await apiClient.post(`${BASE_URL}/${productId}`, seasonData)
+      return res.data?.data || res.data || null
+    } catch (err: unknown) {
+      console.error(`Error creating season for product ${productId}:`, err)
+      return null
+    }
+  })
 }
 
 /* =====================================================
@@ -61,18 +102,8 @@ export const createSeason = async (productId: number, seasonData: CreateSeasonDa
 export const deleteSeason = async (seasonId: string | number): Promise<{ message: string } | null> => {
   try {
     console.log(`Attempting to delete season ${seasonId}...`);
-    
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
 
-    const res = await axios.delete(`/api/new-season/${seasonId}`, { 
-      headers,
+    const res = await apiClient.delete(`/api/new-season/${seasonId}`, { 
       validateStatus: (status) => status < 500 // Don't throw for 4xx errors
     });
     
