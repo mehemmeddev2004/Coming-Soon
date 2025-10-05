@@ -43,19 +43,24 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="flex h-[80vh] items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <ToastContainer position="top-center" autoClose={3000} />
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Admin Hesabınıza Daxil olun
+      <div className="bg-white rounded-xl lg:rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-blue-100 mb-4">
+            <svg className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+            Admin Girişi
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Yalnız admin istifadəçiləri daxil ola bilər
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -63,7 +68,7 @@ const AdminPage = () => {
             </label>
             <input
               type="email"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none transition-all duration-200 bg-gray-50 focus:bg-white"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50 focus:bg-white text-sm sm:text-base"
               placeholder="Email daxil edin"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -77,17 +82,22 @@ const AdminPage = () => {
             </label>
             <input
               type="password"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none transition-all duration-200 bg-gray-50 focus:bg-white"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50 focus:bg-white text-sm sm:text-base"
               placeholder="Şifrənizi daxil edin"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  loginHandler()
+                }
+              }}
             />
           </div>
 
           {/* Giriş düyməsi */}
           <button
             onClick={loginHandler}
-            className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="w-full bg-blue-600 text-white font-semibold py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             Giriş et
           </button>

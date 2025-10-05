@@ -263,9 +263,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
         </div>
         
         {/* Form Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           {/* Name & Slug */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Məhsul adı *</label>
               <input 
@@ -273,7 +273,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
                 placeholder="Ağ köynək" 
                 value={newProduct.name} 
                 onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-sm sm:text-base" 
               />
             </div>
             <div>
@@ -283,7 +283,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
                 placeholder="ag-koynek" 
                 value={newProduct.slug} 
                 onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-sm sm:text-base" 
               />
             </div>
           </div>
@@ -303,44 +303,87 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Şəkil</label>
             <div className="space-y-3">
-              <input 
-                type="file" 
-                accept="image/*"
-                disabled={isImageUploading}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (file) {
-                    // Check file size (max 10MB now that we're using Cloudinary)
-                    if (file.size > 10 * 1024 * 1024) {
-                      setMessage({type: 'error', text: 'Şəkil faylı çox böyükdür! Maksimum 10MB ola bilər.'})
-                      e.target.value = '' // Clear the input
-                      return
+              {/* Mobile-friendly file upload button */}
+              <div className="relative">
+                <input 
+                  type="file" 
+                  accept="image/*,image/heic,image/heif"
+                  capture="environment"
+                  disabled={isImageUploading}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      // Check file size (max 10MB now that we're using Cloudinary)
+                      if (file.size > 10 * 1024 * 1024) {
+                        setMessage({type: 'error', text: 'Şəkil faylı çox böyükdür! Maksimum 10MB ola bilər.'})
+                        e.target.value = '' // Clear the input
+                        return
+                      }
+                      
+                      // Upload image
+                      const imageUrl = await uploadImage(file)
+                      if (imageUrl) {
+                        setNewProduct({ ...newProduct, img: imageUrl })
+                      }
+                      
+                      // Clear the input so the same file can be selected again if needed
+                      e.target.value = ''
                     }
-                    
-                    // Upload image
-                    const imageUrl = await uploadImage(file)
-                    if (imageUrl) {
-                      setNewProduct({ ...newProduct, img: imageUrl })
-                    }
-                    
-                    // Clear the input so the same file can be selected again if needed
-                    e.target.value = ''
-                  }
-                }}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors ${
-                  isImageUploading ? 'opacity-50 cursor-not-allowed' : ''
-                }`} 
-              />
-              <div className="text-sm text-gray-500">
-                Maksimum fayl ölçüsü: 10MB. Şəkillər Cloudinary-ə yüklənir və avtomatik optimallaşdırılır.
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  id="image-upload"
+                />
+                <label 
+                  htmlFor="image-upload"
+                  className={`flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-emerald-400 transition-colors cursor-pointer ${
+                    isImageUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="text-center">
+                    {isImageUploading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600 mr-2"></div>
+                        <span className="text-sm text-gray-600">Yüklənir...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <svg className="mx-auto h-8 w-8 text-gray-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-medium text-emerald-600">Şəkil seçin</span>
+                          <span className="hidden sm:inline"> və ya buraya sürükləyin</span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          <span className="sm:hidden">Kameradan çəkin və ya qalereydən seçin</span>
+                          <span className="hidden sm:inline">PNG, JPG, HEIC (max 10MB)</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </label>
               </div>
-              <div className="text-sm text-gray-500">və ya</div>
+              
+              <div className="text-xs text-gray-500 text-center">
+                <span className="hidden sm:inline">Maksimum fayl ölçüsü: 10MB. Şəkillər Cloudinary-ə yüklənir və avtomatik optimallaşdırılır.</span>
+                <span className="sm:hidden">Max 10MB. Auto-optimized upload.</span>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-2 bg-white text-gray-500">və ya URL daxil edin</span>
+                </div>
+              </div>
+              
               <input 
-                type="text" 
+                type="url" 
                 placeholder="https://example.com/product.jpg" 
                 value={typeof newProduct.img === 'string' && newProduct.img.startsWith('http') ? newProduct.img : ''} 
                 onChange={(e) => setNewProduct({ ...newProduct, img: e.target.value })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-sm" 
               />
             </div>
             {newProduct.img && (

@@ -27,11 +27,32 @@ export const fetchCategories = async () => {
 export const deleteCategory = async (id: string | number) => {
   try {
     const token = localStorage.getItem('token');
+    console.log('Token for category deletion:', token ? 'Present' : 'Missing');
+    
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const response = await fetch(`${BASE_URL}/${id}/categoryId`, { method: 'DELETE', headers });
-    if (!response.ok) throw new Error('Failed to delete category');
+    
+    console.log('Category delete response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+      console.error('Category delete error details:', errorData);
+      
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please login again.');
+      } else if (response.status === 404) {
+        throw new Error('Category not found. It may have already been deleted.');
+      } else {
+        throw new Error(errorData.message || 'Failed to delete category');
+      }
+    }
+    
     return await response.json();
   } catch (error) {
     console.error('Delete category error:', error);
