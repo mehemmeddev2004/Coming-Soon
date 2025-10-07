@@ -138,7 +138,7 @@ const MagnetButton: React.FC<MagnetButtonProps> = ({
       />
 
       <motion.div
-        className="absolute inset-0 rounded-lg bg-amber-400/30 blur-xl pointer-events-none"
+        className="absolute inset-0 rounded-lg  hover:border-1 hover:border-black blur-xl pointer-events-none"
         animate={{
           opacity: isHovered && !disabled ? 0.6 : 0,
           scale: isHovered && !disabled ? 1.1 : 0.8,

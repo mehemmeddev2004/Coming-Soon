@@ -1,9 +1,9 @@
 import axios from "axios"
 import { Product } from "@/types/product"
 
-const BASE_URL = "/api/products"
-
-// 🧩 Tip Tanımlamaları
+/* =====================================================
+ 🧩 Tip Tanımlamaları
+===================================================== */
 type CreateProductData = {
   name: string
   slug?: string
@@ -17,17 +17,12 @@ type CreateProductData = {
   sizes?: string[] | { id: string; name: string; value: string }[]
   colors?: string[] | { id: string; name: string; value: string }[]
   isActive?: boolean
-  specs?: any[]
-  variants?: any[]
+  specs?: unknown[]
+  variants?: unknown[]
 }
 
-type ProductSpecData = {
-  specs: any[]
-}
-
-type ProductVariantData = {
-  variants: any[]
-}
+type ProductSpecData = { specs: unknown[] }
+type ProductVariantData = { variants: unknown[] }
 
 type FilterData = {
   name?: string
@@ -38,45 +33,52 @@ type FilterData = {
   sortOrder?: string
 }
 
-// 🔐 Auth Header Helper
-const getAuthHeaders = (): Record<string, string> => {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  }
+/* =====================================================
+ ⚙️ Konfiqurasiya
+===================================================== */
+const BASE_URL = "/api/products"
+const SERVER_URL = "https://etor.onrender.com/api/products"
 
+/* =====================================================
+ 🔐 Auth Header Helper
+===================================================== */
+const getAuthHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = { "Content-Type": "application/json" }
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token")
     if (token) headers["Authorization"] = `Bearer ${token}`
   }
-
   return headers
 }
+
+/* =====================================================
+ 🔄 URL Helper (SSR / CSR üçün)
+===================================================== */
+const getUrl = (path = ""): string => {
+  // For server-side requests, use full URL with localhost
+  const isServer = typeof window === "undefined"
+  if (isServer) {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    return `${baseUrl}${BASE_URL}${path}`
+  }
+  // For client-side requests, use relative URL
+  return `${BASE_URL}${path}`
+}
+
 /* =====================================================
  🟢 1. Bütün məhsulları gətir
 ===================================================== */
 export const getProducts = async (): Promise<Product[]> => {
   try {
-    // Check if we're on server-side or client-side
-    const isServer = typeof window === 'undefined'
-    
-    let url: string
-    if (isServer) {
-      // Server-side: call backend directly
-      url = 'https://etor.onrender.com/api/products'
-    } else {
-      // Client-side: use local API route
-      url = BASE_URL
-    }
-    
+    const url = getUrl("")
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'NextJS-App/1.0',
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "NextJS-App/1.0",
       },
-      // Add cache control for server-side requests
-      ...(isServer && { cache: 'no-store' })
+      ...(typeof window === "undefined" && { cache: "no-store" }),
     })
 
     if (!response.ok) {
@@ -86,8 +88,8 @@ export const getProducts = async (): Promise<Product[]> => {
 
     const data = await response.json()
     return Array.isArray(data) ? data : []
-  } catch (err: any) {
-    console.error("❌ Məhsullar yüklənərkən xəta:", err.message)
+  } catch (err) {
+    console.error("❌ Məhsullar yüklənərkən xəta:", err)
     return []
   }
 }
@@ -97,77 +99,52 @@ export const getProducts = async (): Promise<Product[]> => {
 ===================================================== */
 export const getProductById = async (id: string | number): Promise<Product | null> => {
   try {
-    console.log(`🔍 Fetching product with ID: ${id}`)
-    
-    // Check if we're on server-side or client-side
-    const isServer = typeof window === 'undefined'
-    
-    let url: string
-    if (isServer) {
-      // Server-side: call backend directly
-      url = `https://etor.onrender.com/api/products/${id}`
-    } else {
-      // Client-side: use local API route
-      url = `${BASE_URL}/${id}`
-    }
-    
-    console.log(`📤 Request URL: ${url}`)
+    const url = getUrl(`/${id}`)
+    console.log(`🔍 Fetching product from: ${url}`)
     
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'NextJS-App/1.0',
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
-      // Add cache control for server-side requests
-      ...(isServer && { cache: 'no-store' })
+      ...(typeof window === "undefined" && { cache: "no-store" }),
     })
-    
+
     console.log(`📥 Response status: ${response.status}`)
-    
-    if (!response.ok) {
-      console.error(`❌ HTTP Error: ${response.status} ${response.statusText}`)
-      
-      // If product not found, try to find by matching ID from available products
-      if (response.status === 404) {
-        console.log(`🔄 Product ${id} not found, trying to get available products...`)
-        try {
-          const allProducts = await getProducts()
-          console.log(`📋 Available products:`, allProducts.map(p => ({ id: p.id, name: p.name })))
-          
-          if (allProducts.length > 0) {
-            // Try to find product by ID match
-            const matchedProduct = allProducts.find(p => p.id.toString() === id.toString())
-            if (matchedProduct) {
-              console.log(`✅ Found matching product: ${matchedProduct.name} (ID: ${matchedProduct.id})`)
-              return matchedProduct
-            }
-            
-            // If no match, use the product at the requested index (if exists)
-            const requestedIndex = Number(id) - 1
-            if (requestedIndex >= 0 && requestedIndex < allProducts.length) {
-              console.log(`✅ Using product at index ${requestedIndex}: ${allProducts[requestedIndex].name}`)
-              return allProducts[requestedIndex]
-            }
-            
-            // Last fallback: use first product
-            console.log(`✅ Using fallback product: ${allProducts[0].name} (ID: ${allProducts[0].id})`)
-            return allProducts[0]
-          }
-        } catch (fallbackErr) {
-          console.error(`❌ Fallback failed:`, fallbackErr)
-        }
-      }
-      
+
+    // Try to get the response data even if status is not ok
+    const responseText = await response.text()
+    console.log(`📄 Response text length: ${responseText.length}, content: ${responseText.substring(0, 200)}...`)
+
+    let data
+    try {
+      data = JSON.parse(responseText)
+      console.log(`📋 Parsed data:`, data)
+    } catch (parseError) {
+      console.error(`❌ Failed to parse response JSON:`, parseError)
+      console.error(`❌ Raw response text:`, responseText)
       return null
     }
-    
-    const data = await response.json()
-    console.log(`✅ Product fetched successfully:`, data)
+
+    // If we got data (even with non-200 status), and it looks like a product, return it
+    if (data && typeof data === 'object' && (data.id || data._id || data.name)) {
+      console.log(`✅ Got product data: ${data.name || data.id}`)
+      return data
+    }
+
+    if (!response.ok) {
+      console.error(`❌ Product ${id} not found: ${response.status}`, data)
+      return null
+    }
+
+    console.log(`✅ Returning product data:`, data)
     return data || null
-  } catch (err: any) {
-    console.error(`❌ Failed to fetch product ${id}:`, err.message)
+  } catch (err) {
+    console.error(`❌ Failed to fetch product ${id}:`, err)
+    console.error(`❌ Error type:`, typeof err)
+    console.error(`❌ Error message:`, err instanceof Error ? err.message : 'Unknown error')
+    console.error(`❌ Error stack:`, err instanceof Error ? err.stack : 'No stack trace')
     return null
   }
 }
@@ -175,43 +152,32 @@ export const getProductById = async (id: string | number): Promise<Product | nul
 /* =====================================================
  🟢 3. Məhsul əlavə et
 ===================================================== */
-
 export const createProduct = async (data: CreateProductData): Promise<Product | null> => {
   try {
-    console.log("🚀 Creating product with data:", data)
-    
-    if (!data.categoryId) {
-      console.error("❌ categoryId is missing:", data.categoryId)
-      throw new Error("categoryId tələb olunur")
-    }
+    if (!data.categoryId) throw new Error("categoryId tələb olunur")
 
     const url = `/api/products/category/${data.categoryId}`
+    const { categoryId: _, specs: __, variants: ___, ...body } = data
 
-
-    // Remove categoryId, specs, variants from body data
-    const { categoryId, specs, variants, ...bodyData } = data
-
-    const res = await axios.post(url, bodyData, { headers: getAuthHeaders() })
-    console.log("✅ Yeni məhsul yaradıldı:", res.data)
+    const res = await axios.post(url, body, { headers: getAuthHeaders() })
     return res.data
-  } catch (err: any) {
+  } catch (err) {
     console.error("❌ Məhsul əlavə olunmadı:", err)
     return null
   }
 }
 
-
 /* =====================================================
  🟢 4. Məhsulun xüsusiyyətlərini (specs) əlavə et
 ===================================================== */
-export const createProductSpecs = async (productId: number, specsData: ProductSpecData): Promise<any[] | null> => {
+export const createProductSpecs = async (
+  productId: number,
+  { specs }: ProductSpecData
+): Promise<unknown[] | null> => {
   try {
-    // Use local Next.js API route instead of external API
     const url = `/api/products/${productId}/specs`
     const headers = getAuthHeaders()
-
-    const specs = specsData.specs
-    const results: any[] = []
+    const results = []
 
     for (const spec of specs) {
       const res = await axios.post(url, spec, { headers })
@@ -220,7 +186,7 @@ export const createProductSpecs = async (productId: number, specsData: ProductSp
 
     return results
   } catch (err) {
-    console.error("Specs əlavə olunmadı:", err)
+    console.error("❌ Specs əlavə olunmadı:", err)
     return null
   }
 }
@@ -228,14 +194,14 @@ export const createProductSpecs = async (productId: number, specsData: ProductSp
 /* =====================================================
  🟢 5. Məhsulun variantlarını əlavə et
 ===================================================== */
-export const createProductVariants = async (productId: number, variantsData: ProductVariantData): Promise<any[] | null> => {
+export const createProductVariants = async (
+  productId: number,
+  { variants }: ProductVariantData
+): Promise<unknown[] | null> => {
   try {
-    // Use local Next.js API route instead of external API
     const url = `/api/products/${productId}/variants`
     const headers = getAuthHeaders()
-
-    const variants = variantsData.variants
-    const results: any[] = []
+    const results = []
 
     for (const variant of variants) {
       const res = await axios.post(url, variant, { headers })
@@ -244,7 +210,7 @@ export const createProductVariants = async (productId: number, variantsData: Pro
 
     return results
   } catch (err) {
-    console.error("Variants əlavə olunmadı:", err)
+    console.error("❌ Variants əlavə olunmadı:", err)
     return null
   }
 }
@@ -252,14 +218,12 @@ export const createProductVariants = async (productId: number, variantsData: Pro
 /* =====================================================
  🟢 6. Məhsulu yenilə
 ===================================================== */
-export const updateProduct = async (id: string | number, data: Partial<Product>): Promise<Product | null> => {
+export const updateProduct = async (id: string | number, data: Partial<Product>) => {
   try {
-    console.log(`🔄 Updating product ${id} with data:`, data)
     const res = await axios.put(`${BASE_URL}/${id}`, data, { headers: getAuthHeaders() })
-    console.log(`✅ Product ${id} updated successfully:`, res.data)
     return res.data
-  } catch (err: any) {
-    console.error(`❌ Failed to update product ${id}:`, err.response?.data || err.message)
+  } catch (err) {
+    console.error(`❌ Failed to update product ${id}:`, err)
     return null
   }
 }
@@ -267,14 +231,12 @@ export const updateProduct = async (id: string | number, data: Partial<Product>)
 /* =====================================================
  🟢 7. Məhsulu sil
 ===================================================== */
-export const deleteProduct = async (id: string | number): Promise<{ message: string } | null> => {
+export const deleteProduct = async (id: string | number) => {
   try {
-    console.log(`🗑️ Deleting product ${id}`)
     const res = await axios.delete(`${BASE_URL}/${id}`, { headers: getAuthHeaders() })
-    console.log(`✅ Product ${id} deleted successfully:`, res.data)
     return res.data
-  } catch (err: any) {
-    console.error(`❌ Failed to delete product ${id}:`, err.response?.data || err.message)
+  } catch (err) {
+    console.error(`❌ Failed to delete product ${id}:`, err)
     return null
   }
 }
@@ -284,12 +246,10 @@ export const deleteProduct = async (id: string | number): Promise<{ message: str
 ===================================================== */
 export const filterProducts = async (filters: FilterData): Promise<Product[]> => {
   try {
-    console.log(`🔍 Filtering products with:`, filters)
     const res = await axios.post(`${BASE_URL}/filter`, filters, { headers: getAuthHeaders() })
-    console.log(`✅ Filtered products:`, res.data)
     return Array.isArray(res.data) ? res.data : []
-  } catch (err: any) {
-    console.error("❌ Filter failed:", err.response?.data || err.message)
+  } catch (err) {
+    console.error("❌ Filter failed:", err)
     return []
   }
 }
@@ -297,32 +257,17 @@ export const filterProducts = async (filters: FilterData): Promise<Product[]> =>
 /* =====================================================
  🟢 9. Parametrlərlə məhsulları gətir (search, sort, pagination)
 ===================================================== */
-export const getFilteredProducts = async (filters: {
-  name?: string
-  minPrice?: number
-  maxPrice?: number
-  categoryId?: number
-  sortBy?: string
-  sortOrder?: string
-  page?: number
-  limit?: number
-}): Promise<Product[]> => {
+export const getFilteredProducts = async (filters: FilterData & { page?: number; limit?: number }) => {
   try {
     const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) params.append(key, String(val))
+    })
 
-    for (const key in filters) {
-      const value = filters[key as keyof typeof filters]
-      if (value !== undefined && value !== null) {
-        params.append(key, String(value))
-      }
-    }
-
-    console.log(`🔍 Getting filtered products with params:`, params.toString())
     const res = await axios.get(`${BASE_URL}?${params.toString()}`, { headers: getAuthHeaders() })
-    console.log(`✅ Filtered products retrieved:`, res.data)
     return Array.isArray(res.data) ? res.data : []
-  } catch (err: any) {
-    console.error("❌ Failed to get filtered products:", err.response?.data || err.message)
+  } catch (err) {
+    console.error("❌ Failed to get filtered products:", err)
     return []
   }
 }

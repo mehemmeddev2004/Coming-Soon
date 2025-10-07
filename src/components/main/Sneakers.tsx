@@ -6,15 +6,21 @@ import type { Product } from "@/types/product"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
+import { Swiper, SwiperSlide } from "swiper/react"
+import { Navigation, Pagination } from "swiper/modules"
+import "swiper/css"
+import "swiper/css/navigation"
+import "swiper/css/pagination"
+
 const Sneakers = () => {
   const [products, setProducts] = useState<Product[]>([])
   const { addItem } = useCart()
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedProducts = await getProducts()
-        console.log("Fetched products:", fetchedProducts)
         setProducts(Array.isArray(fetchedProducts) ? fetchedProducts : [])
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -23,11 +29,26 @@ const Sneakers = () => {
     fetchData()
   }, [])
 
-  const isCategory15 = (item: Product) => {
-    if (item.categoryId) return Number(item.categoryId) === 15
-    if (item.category?.id) return Number(item.category.id) === 15
-    return false
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 991)
+    }
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  const filters = {
+    minPrice: "0",
+    maxPrice: "1000",
+    categoryId: "1",
+    sortBy: "price",
+    sortOrder: "asc",
   }
+  const queryString = new URLSearchParams(filters).toString()
+
+  const isCategory15 = (item: Product) => Number(item.categoryId ?? item.category?.id) === 15
 
   const isLatest = (date?: string) => {
     if (!date) return false
@@ -36,77 +57,101 @@ const Sneakers = () => {
     return created > weekAgo
   }
 
-  return (
-    <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 p-4 md:p-6">
-      <h1 className="text-2xl md:text-3xl lg:text-4xl text-center font-semibold uppercase tracking-wide font-sans mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-        Ayaqqabılar
-      </h1>
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-1/2">
-          <img src="/img/sneaker.jpeg" alt="Sneaker Banner" className="w-full aspect-[3/2] h-[520px] rounded-lg" />
+  const renderProductCard = (item: Product) => (
+    <Link key={item.id} href={`/product/${item.id}?${queryString}`}>
+      <div className="cursor-pointer bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
+        <div className="relative w-full aspect-square overflow-hidden rounded-t-lg mb-3">
+          <img
+            src={item.images || item.img}
+            alt={item.name}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
-        <div className="w-full lg:w-1/2 rounded-lg flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-2 lg:max-h-[676px] lg:overflow-y-auto">
-            {products.filter(isCategory15).length === 0 ? (
-              <div className="col-span-full flex justify-center items-center text-muted-foreground py-10">
-                Heç bir məhsul tapılmadı.
-              </div>
-            ) : (
-              products
-                .filter(isCategory15)
-                .slice(0, 10)
-                .map((item, index) => (
-                  <div key={index} className="flex flex-col items-start gap-2">
-                    <Link
-                      key={item.id}
-                      href={{
-                        pathname: `/product/${item.id}`,
-                        query: {
-                          category: item.categoryId || item.category?.id || "15",
-                          name: encodeURIComponent(item.name || ""),
-                        },
+        {/* Məhsul məlumatları */}
+        <div className="flex flex-col gap-2 px-2 pb-2">
+          <div className="flex justify-between items-start gap-2">
+            {/* Latest etiketi */}
+            {(item.isNew || isLatest(item.createdAt || item.date || "")) && (
+              <span className="flex items-center gap-[5px] cursor-default text-[10px] sm:text-[11px] font-semibold leading-tight tracking-wider uppercase">
+                <div className="w-[5px] h-[5px] bg-black rounded-full flex-shrink-0" /> Latest
+              </span>
+            )}
+
+            {item.specs && Array.isArray(item.specs) && (
+              <div className="flex flex-wrap gap-1.5 justify-end">
+                {item.specs
+                  .flatMap((spec: any) => (spec?.values && Array.isArray(spec.values) ? spec.values : []))
+                  .slice(0, 4)
+                  .map((v: any, index: number) => (
+                    <span
+                      key={v?.id ?? index}
+                      className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
+                      style={{
+                        backgroundColor: v?.value && typeof v.value === "string" ? v.value : "#f3f4f6",
                       }}
-                    >
-                      <div className="w-full cursor-pointer">
-                        <img
-                          src={item.images || item.img}
-                          alt={item.name}
-                          className="w-full aspect-square object-cover rounded-md transition-transform duration-300 hover:scale-105"
-                        />
-                        <div className="flex flex-col items-start mt-2">
-                          {(item.isNew || isLatest(item.createdAt || item.date || "")) && (
-                            <span className="flex items-center mb-1 gap-1 text-xs font-semibold uppercase tracking-wider">
-                              <div className="w-1 h-1 bg-black rounded-full"></div> Latest
-                            </span>
-                          )}
-                          <span className="mb-1 text-sm text-gray-800 hover:text-gray-400 font-normal tracking-wide">
-                            {item.name}
-                          </span>
-                          {item.specs && (
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              {item.specs
-                                .filter((spec) => spec.name.toLowerCase().includes("color"))
-                                .flatMap((spec) =>
-                                  spec.values.map((v, i) => (
-                                    <span key={i} className="text-gray-500 text-sm font-normal tracking-wide">
-                                      {v.value}
-                                    </span>
-                                  )),
-                                )}
-                            </div>
-                          )}
-                          <span className="text-sm font-normal tracking-wide">AZN {item.price}</span>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                ))
+                      title={v?.name || v?.value || "Color option"}
+                    />
+                  ))}
+              </div>
             )}
           </div>
+
+          <span className="text-xs sm:text-[13px] text-gray-800 hover:text-gray-600 font-normal leading-relaxed tracking-wide line-clamp-2">
+            {item.name}
+          </span>
+
+          <span className="text-sm sm:text-[13px] font-semibold leading-relaxed tracking-wide text-gray-900">
+            AZN {item.price}
+          </span>
         </div>
       </div>
+    </Link>
+  )
+
+  const filteredProducts = products.filter(isCategory15)
+
+  return (
+    <div className="w-full max-w-[1430px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
+      <span className="block text-lg sm:text-xl md:text-2xl text-center font-semibold uppercase tracking-wide font-sans mb-8 sm:mb-10 md:mb-12 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+        Ayaqqabilar
+      </span>
+
+      {isMobile ? (
+        <div className="overflow-hidden -mx-4 px-4">
+          <Swiper
+            modules={[Navigation, Pagination]}
+            spaceBetween={16}
+            slidesPerView={1.5}
+            breakpoints={{
+              480: {
+                slidesPerView: 2.2,
+                spaceBetween: 16,
+              },
+              640: {
+                slidesPerView: 2.5,
+                spaceBetween: 20,
+              },
+              768: {
+                slidesPerView: 3.2,
+                spaceBetween: 20,
+              },
+            }}
+            grabCursor={true}
+            className="!overflow-visible"
+          >
+            {filteredProducts.map((item) => (
+              <SwiperSlide key={item.id}>{renderProductCard(item)}</SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      ) : (
+        <div className="max-w-[1280px] mx-auto w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
+            {filteredProducts.map(renderProductCard)}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

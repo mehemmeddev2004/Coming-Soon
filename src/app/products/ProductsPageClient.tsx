@@ -26,20 +26,16 @@ const ProductsPageClient = () => {
   }, []);
 
   useEffect(() => {
-    // If no filters, show all
-    const noFilters = !(
-      selectedCategories.length ||
-      selectedColor ||
-      selectedSort ||
-      minPrice !== "" ||
-      maxPrice !== ""
-    );
+    const noFilters =
+      !selectedCategories.length &&
+      !selectedColor &&
+      !selectedSort &&
+      minPrice === "" &&
+      maxPrice === "";
     if (noFilters) {
       setFilteredProducts(products);
       return;
     }
-
-    // Compute everything on client using helpers
     let local = [...products];
     local = applyCategoryFilter(local, selectedCategories);
     local = applyColorFilter(local, selectedColor);
@@ -50,7 +46,7 @@ const ProductsPageClient = () => {
 
   const toggleSection = (key: string) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  const toggleFilters = () => setFiltersOpen(!filtersOpen);
+  const toggleFilters = () => setFiltersOpen((prev) => !prev);
 
   const resetFilters = async () => {
     setSelectedCategories([]);
@@ -58,15 +54,13 @@ const ProductsPageClient = () => {
     setSelectedSort("");
     setMinPrice("");
     setMaxPrice("");
-    // reset category checkbox UI
     setChecked([]);
     const all = await getProducts();
     setFilteredProducts(all || []);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 min-h-screen flex flex-col relative">
-      {/* Header */}
+    <div className="max-w-[1430px] mx-auto px-4 py-4 min-h-screen flex flex-col relative">
       <div className="flex justify-between items-center mb-3">
         <span className="font-semibold text-[15px] text-gray-600">
           Products ({filteredProducts.length})
@@ -76,9 +70,8 @@ const ProductsPageClient = () => {
         </button>
       </div>
 
-      {/* Product Grid */}
       {filteredProducts.length ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3  w-full">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id ?? product._id} product={product} />
           ))}
@@ -108,12 +101,11 @@ const ProductsPageClient = () => {
         maxPrice={maxPrice}
         onChangeMin={setMinPrice}
         onChangeMax={setMaxPrice}
-        onApplyPrice={() => {}} // applyPrice artıq useEffect-də işləyir
+        onApplyPrice={() => {}}
         onChangeSelectedCategories={setSelectedCategories}
         checked={checked}
         setChecked={setChecked}
       />
-      
     </div>
   );
 };

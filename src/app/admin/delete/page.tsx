@@ -2,15 +2,12 @@
 import React, { useState, useEffect } from "react"
 import { getProducts, deleteProduct } from "@/utils/fetchProducts"
 import { fetchCategories, deleteCategory } from "@/utils/fetchCategories"
-import { getAllSeasons, deleteSeason } from "@/utils/fetchSeasons"
 import { category } from "@/types/category"
 import { Product } from "@/types/product"
-import { Season } from "@/types/season"
 
 const Page = () => {
   const [categories, setCategories] = useState<category[]>([])
   const [products, setProducts] = useState<Product[]>([])
-  const [seasons, setSeasons] = useState<Season[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -18,17 +15,13 @@ const Page = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, categoriesData, seasonsData] = await Promise.all([
+        const [productsData, categoriesData] = await Promise.all([
           getProducts(),
-          fetchCategories(),
-          getAllSeasons()
+          fetchCategories()
         ])
         setProducts(productsData)
         setCategories(categoriesData)
-        setSeasons(seasonsData)
         console.log("Loaded categories:", categoriesData) // Debug: see what categories exist
-        console.log("Loaded seasons:", seasonsData) // Debug: see what seasons exist
-        console.log("Season IDs:", seasonsData.map(s => ({ id: s.id, name: s.name }))) // Debug: show season IDs
       } catch (error) {
         console.error("Error fetching data:", error)
         setError("Məlumatlar yüklənərkən xəta baş verdi")
@@ -80,8 +73,6 @@ const Page = () => {
       const result = await deleteProduct(id)
       if (result !== null) {
         setProducts(products.filter(p => p.id !== id))
-        // Məhsul silinəndə həmin məhsula aid sezonları da sil
-        setSeasons(seasons.filter(s => s.product?.id !== id.toString()))
         setSuccess(`"${name}" məhsulu uğurla silindi`)
       } else {
         setError("Məhsul silinərkən xəta baş verdi")
@@ -94,49 +85,6 @@ const Page = () => {
     }
   }
 
-  const handleDeleteSeason = async (id: string | number, name: string) => {
-    console.log(`Attempting to delete season ${id} (${name})...`);
-    
-    if (!window.confirm(`"${name}" sezonunu silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.`)) {
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-    setSuccess(null)
-
-    try {
-      const result = await deleteSeason(id)
-      if (result !== null) {
-        setSeasons(seasons.filter(s => s.id !== id))
-        setSuccess(`"${name}" sezonu uğurla silindi`)
-      } else {
-        setError("Sezon silinərkən xəta baş verdi")
-      }
-    } catch (error: any) {
-      console.error("Delete season error:", error)
-      
-      // Show specific error messages based on the error
-      if (error.message?.includes('500')) {
-        setError(`Sezon ID ${id} backend serverdə mövcud deyil. Səhifəni yeniləyin.`)
-      } else if (error.message?.includes('404')) {
-        setError(`Sezon ID ${id} tapılmadı. Artıq silinmiş ola bilər.`)
-      } else {
-        setError(`Sezon silinərkən xəta: ${error.message || 'Naməlum xəta'}`)
-      }
-      
-      // Refresh the seasons list to show current state
-      try {
-        const updatedSeasons = await getAllSeasons()
-        setSeasons(updatedSeasons)
-        console.log('Refreshed seasons after error:', updatedSeasons.map(s => ({ id: s.id, name: s.name })))
-      } catch (refreshError) {
-        console.error('Failed to refresh seasons:', refreshError)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
 
   // Clear messages after 5 seconds
   useEffect(() => {
@@ -242,37 +190,6 @@ const Page = () => {
           )}
         </section>
 
-        {/* Seasons Section */}
-        <section id="seasons">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Sezonlar</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {seasons.map((season) => (
-              <div key={season.id} className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                <div className="mb-3 sm:mb-0">
-                  <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{season.name}</h4>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    Növ: {season.seasonType === 'spring' ? 'Yaz' : 
-                         season.seasonType === 'summer' ? 'Yay' : 
-                         season.seasonType === 'autumn' ? 'Pazız' : 
-                         season.seasonType === 'winter' ? 'Qış' : season.seasonType}
-                  </p>
-                  <p className="text-xs sm:text-sm text-gray-600">Məhsul: {season.product?.name || "N/A"}</p>
-                  <p className="text-xs sm:text-sm text-gray-600">ID: {season.id}</p>
-                </div>
-                <button
-                  onClick={() => handleDeleteSeason(season.id, season.name)}
-                  disabled={loading}
-                  className="px-3 py-2 text-xs sm:text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-                >
-                  Sil
-                </button>
-              </div>
-            ))}
-          </div>
-          {seasons.length === 0 && (
-            <p className="text-gray-500 text-center py-6 sm:py-8 text-sm sm:text-base">Heç bir sezon tapılmadı</p>
-          )}
-        </section>
       </div>
     </div>
   )

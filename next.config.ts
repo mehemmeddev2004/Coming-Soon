@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "kith.com",
+      },
+      {
+        protocol: "https",
+        hostname: "media.endclothing.com",
+      },
     ],
   },
   // Video optimization

@@ -36,7 +36,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const page = [
   { id: 1, name: "Yarat", slug: "create", icon: Plus },
-  { id: 2, name: "Yeni Sezon Mallari", slug: "seasson", icon: Star },
   { id: 3, name: "Sil", slug: "delete", icon: Trash2 },
   { id: 4, name: "İstifadəçilər", slug: "users", icon: Users },
  

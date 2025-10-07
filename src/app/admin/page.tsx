@@ -2,29 +2,24 @@
 import { useState, useEffect } from 'react'
 import { getProducts } from '@/utils/fetchProducts'
 import { fetchCategories } from '@/utils/fetchCategories'
-import { getAllSeasons } from '@/utils/fetchSeasons'
 
 export default function AdminHomePage() {
   const [stats, setStats] = useState({
     products: 0,
     categories: 0,
-    seasons: 0,
     loading: true
   })
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [productsData, categoriesData, seasonsData] = await Promise.all([
+        const [productsData, categoriesData] = await Promise.all([
           getProducts(),
           fetchCategories(),
-          getAllSeasons()
         ])
-        
         setStats({
           products: Array.isArray(productsData) ? productsData.length : 0,
           categories: Array.isArray(categoriesData) ? categoriesData.length : 0,
-          seasons: Array.isArray(seasonsData) ? seasonsData.length : 0,
           loading: false
         })
       } catch (error) {
@@ -32,7 +27,6 @@ export default function AdminHomePage() {
         setStats(prev => ({ ...prev, loading: false }))
       }
     }
-
     fetchStats()
   }, [])
 
@@ -50,7 +44,7 @@ export default function AdminHomePage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -86,24 +80,6 @@ export default function AdminHomePage() {
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-purple-100">
-                  <svg className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Sezonlar</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {stats.loading ? '...' : stats.seasons}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Welcome Card */}
@@ -118,7 +94,7 @@ export default function AdminHomePage() {
               Xoş gəlmisiniz!
             </h2>
             <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto">
-              Admin panelində məhsullar, kateqoriyalar və sezonları idarə edə bilərsiniz.
+              Admin panelində məhsullar və kateqoriyalar idarə edə bilərsiniz.
             </p>
           </div>
         </div>

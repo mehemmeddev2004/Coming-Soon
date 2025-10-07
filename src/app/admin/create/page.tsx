@@ -2,10 +2,8 @@
 import React, { useEffect } from "react"
 import { useCategory } from "@/hooks/useCategory"
 import { useProduct } from "@/hooks/useProduct"
-import { useSeason } from "@/hooks/useSeason"
 import CategoryForm from "@/components/admin/CategoryForm"
 import ProductForm from "@/components/admin/ProductForm"
-import SeasonForm from "@/components/admin/SeasonForm"
 
 const Page = () => {
   // Custom hooks
@@ -33,11 +31,6 @@ const Page = () => {
     handleAddProduct
   } = useProduct()
 
-  const {
-    showSeasonForm,
-    setShowSeasonForm,
-    handleAddSeason
-  } = useSeason()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -126,39 +119,6 @@ const Page = () => {
           </div>
         </section>
 
-          {/* Seasons Section */}
-          <section id="seasons" className="mb-8 sm:mb-12">
-            <div className="bg-white rounded-xl lg:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-4 sm:mb-0">
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Yeni Sezonlar</h3>
-                    <p className="text-gray-600 text-xs sm:text-sm mt-1">Məhsullar üçün yeni sezon yaradın</p>
-                  </div>
-                  <button
-                    onClick={() => setShowSeasonForm(!showSeasonForm)}
-                    className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
-                    </svg>
-                    <span className="hidden sm:inline">Yeni sezon əlavə et</span>
-                    <span className="sm:hidden">Sezon əlavə et</span>
-                  </button>
-                </div>
-              </div>
-              
-              <div className="p-4 sm:p-6 lg:p-8">
-                <div className="text-center py-8 sm:py-12 text-gray-500">
-                  <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
-                  </svg>
-                  <p className="text-xs sm:text-sm">Məhsullar üçün yeni sezonlar yaradın</p>
-                  <p className="text-xs mt-1">Sezon yaratmaq üçün yuxarıdakı düyməni basın</p>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* Products Section */}
           <section id="products">
@@ -237,13 +197,7 @@ const Page = () => {
         setProductVariants={setProductVariants}
       />
 
-      {/* Season Modal */}
-      <SeasonForm
-        show={showSeasonForm}
-        onClose={() => setShowSeasonForm(false)}
-        onSubmit={handleAddSeason}
-        products={products}
-      />
+     
     </div>
   )
 }

@@ -38,6 +38,34 @@ export async function GET(
     
     if (!response.ok) {
       console.log('❌ Backend error:', data);
+      
+      // If product not found, try to get the first available product as fallback
+      if (response.status === 404) {
+        console.log('🔄 Product not found, trying to get first available product...');
+        try {
+          const fallbackResponse = await fetch(`https://etor.onrender.com/api/products`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'NextJS-Proxy/1.0',
+            },
+          });
+          
+          if (fallbackResponse.ok) {
+            const fallbackText = await fallbackResponse.text();
+            const fallbackData = JSON.parse(fallbackText);
+            
+            // If we get an array of products, return the first one
+            if (Array.isArray(fallbackData) && fallbackData.length > 0) {
+              console.log('✅ Using first available product as fallback');
+              return NextResponse.json(fallbackData[0], { status: 200 });
+            }
+          }
+        } catch (fallbackError) {
+          console.error('❌ Fallback failed:', fallbackError);
+        }
+      }
+      
       return NextResponse.json(
         { 
           message: data.message || 'Məhsul tapılmadı',
