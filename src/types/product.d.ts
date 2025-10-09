@@ -3,6 +3,7 @@ export type Product = {
   sizes: string[] | { id: string; name: string; value: string }[];
   colors: string[] | { id: string; name: string; value: string }[];
   id: string;
+  _id?: string; // Optional MongoDB-style ID
   slug: string;
   name: string;
   description?: string;

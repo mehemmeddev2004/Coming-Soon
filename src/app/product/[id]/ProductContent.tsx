@@ -43,12 +43,14 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
         <div className="flex flex-wrap justify-center gap-2">
           {product.specs.flatMap(spec => 
             spec?.values?.map(value => (
-              <span 
-                key={`${spec?.id ?? ''}-${value?.id ?? ''}`} 
-                className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-md"
-              >
-                {value?.value ?? ''}
-              </span>
+              spec && value ? (
+                <span 
+                  key={`${spec?.id ?? ''}-${value?.id ?? ''}`} 
+                  className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-md"
+                >
+                  {value?.value ?? ''}
+                </span>
+              ) : null
             ))
           )}
         </div>
@@ -108,7 +110,9 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
                     Array.isArray(product.description) ? (
                       <ul className="list-disc pl-5 space-y-1">
                         {product.description.map((line, idx) => (
-                          <li key={idx}>{line}</li>
+                          line !== undefined && line !== null ? (
+                            <li key={idx}>{line}</li>
+                          ) : null
                         ))}
                       </ul>
                     ) : (

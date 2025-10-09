@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NODE_ENV === 'production' 
       ? 'https://your-domain.com' 
-      : 'http://localhost:3001'
+      : 'http://localhost:3000'
   },
   images: {
     remotePatterns: [
@@ -49,10 +49,6 @@ const nextConfig: NextConfig = {
       {
         source: '/api/categories/:path*',
         destination: 'https://etor.onrender.com/api/categories/:path*',
-      },
-      {
-        source: '/api/products/:path*',
-        destination: 'https://etor.onrender.com/api/products/:path*',
       },
       {
         source: '/api/upload/:path*',

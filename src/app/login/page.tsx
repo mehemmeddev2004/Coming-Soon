@@ -71,17 +71,7 @@ const registerHandler = async () => {
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
-                <select
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black outline-none transition-all duration-200 bg-gray-50 focus:bg-white"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  <option value="user">İstifadəçi</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
+           
             </>
           )}
 

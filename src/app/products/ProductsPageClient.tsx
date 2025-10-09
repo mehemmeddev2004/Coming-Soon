@@ -4,10 +4,12 @@ import ProductFilter from "@/components/ui/product/ProductFilter";
 import { getProducts } from "@/utils/fetchProducts";
 import ProductCard from "@/components/ui/product/ProductCard";
 import { applyCategoryFilter, applyColorFilter, applyPriceFilter, applySort } from "@/utils/productFilters";
+import type { Product } from "@/types/product";
+
 
 const ProductsPageClient = () => {
-  const [products, setProducts] = useState<any[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [selectedSort, setSelectedSort] = useState<string>("");
@@ -17,6 +19,7 @@ const ProductsPageClient = () => {
   const [selectedCategories, setSelectedCategories] = useState<Array<string | number>>([]);
   const [checked, setChecked] = useState<boolean[]>([]);
 
+
   useEffect(() => {
     (async () => {
       const prods = await getProducts();
@@ -24,6 +27,7 @@ const ProductsPageClient = () => {
       setFilteredProducts(prods || []);
     })();
   }, []);
+
 
   useEffect(() => {
     const noFilters =
@@ -44,9 +48,11 @@ const ProductsPageClient = () => {
     setFilteredProducts(local);
   }, [selectedCategories, selectedColor, selectedSort, minPrice, maxPrice, products]);
 
+
   const toggleSection = (key: string) =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const toggleFilters = () => setFiltersOpen((prev) => !prev);
+
 
   const resetFilters = async () => {
     setSelectedCategories([]);
@@ -59,6 +65,7 @@ const ProductsPageClient = () => {
     setFilteredProducts(all || []);
   };
 
+
   return (
     <div className="max-w-[1430px] mx-auto px-4 py-4 min-h-screen flex flex-col relative">
       <div className="flex justify-between items-center mb-3">
@@ -70,10 +77,17 @@ const ProductsPageClient = () => {
         </button>
       </div>
 
+
       {filteredProducts.length ? (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3  w-full">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id ?? product._id} product={product} />
+          {filteredProducts.map((product, idx) => (
+            product && typeof product === "object" ? (
+              (product.id || product._id) ? (
+                <ProductCard key={product.id ?? product._id} item={product} />
+              ) : (
+                <ProductCard key={idx} item={product} />
+              )
+            ) : null
           ))}
         </div>
       ) : (
@@ -87,6 +101,7 @@ const ProductsPageClient = () => {
           </button>
         </div>
       )}
+
 
       <ProductFilter
         handleFilterChange={filtersOpen}
@@ -109,5 +124,6 @@ const ProductsPageClient = () => {
     </div>
   );
 };
+
 
 export default ProductsPageClient;

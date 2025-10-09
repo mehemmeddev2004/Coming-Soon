@@ -24,7 +24,12 @@ const fallbackImages = [
 // SEO metadata
 export async function generateMetadata({ params }: Props) {
   const resolvedParams = await params
-  const product = await getProductById(Number(resolvedParams.id))
+  let product = null
+  try {
+    product = await getProductById(Number(resolvedParams.id))
+  } catch (error) {
+    console.error("Failed to fetch product for metadata:", error)
+  }
 
   return {
     title: product ? product.name : "Product not found",
@@ -38,22 +43,30 @@ export async function generateMetadata({ params }: Props) {
 
 const ProductPage = async ({ params }: Props) => {
   const resolvedParams = await params
+  const productId = Number(resolvedParams.id)
   console.log("ProductPage params:", resolvedParams)
-  console.log("Product ID:", resolvedParams.id)
-  
+  console.log("Product ID:", productId)
+  console.log(`🔍 Fetching product from: http://localhost:3001/api/products/${productId}`)
+
   let product
 
   try {
-    product = await getProductById(Number(resolvedParams.id))
+    product = await getProductById(productId)
+    if (!product) {
+      console.error(`❌ Product not found or fetch failed for product ${productId}. Possible reasons: network/server error, product does not exist.`)
+      redirect("/")
+      return null
+    }
     console.log("Fetched product:", product)
-  } catch (error) {
-    console.error("Error fetching product:", error)
+  } catch (error: any) {
+    console.error(`❌ Exception while fetching product ${productId}:`, error)
+    console.error("❌ Error type:", typeof error)
+    console.error("❌ Error message:", error?.message)
+    if (error?.message === "fetch failed") {
+      console.error("❌ Network/server error: Unable to reach API endpoint or endpoint returned error.")
+    }
     redirect("/")
-  }
-
-  if (!product) {
-    console.log("Product not found, redirecting to home")
-    redirect("/")
+    return null
   }
 
   const galleryImages =
