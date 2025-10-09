@@ -288,6 +288,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
             </div>
           </div>
           
+          
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Təsvir</label>

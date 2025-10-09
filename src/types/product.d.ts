@@ -1,5 +1,4 @@
 export type Product = {
-  brand: string | { id: string; name: string };
   sizes: string[] | { id: string; name: string; value: string }[];
   colors: string[] | { id: string; name: string; value: string }[];
   id: string;
@@ -9,6 +8,7 @@ export type Product = {
   description?: string;
   img?: string; // əsas şəkil
   images?: string;
+  brand: string; // <-- only string, required
   imageUrl?: string;
   price: number | string; // API-də string gəlir, lazım gələrsə number-a çevir
   stock: number;

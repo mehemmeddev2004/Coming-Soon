@@ -34,13 +34,13 @@ type FilterData = {
 }
 
 /* =====================================================
- ⚙️ Konfiqurasiya
+⚙️ Konfiqurasiya
 ===================================================== */
 const BASE_URL = "/api/products"
 const SERVER_URL = "https://etor.onrender.com/api/products"
 
 /* =====================================================
- 🔐 Auth Header Helper
+🔐 Auth Header Helper
 ===================================================== */
 const getAuthHeaders = (): Record<string, string> => {
   const headers: Record<string, string> = { "Content-Type": "application/json" }

@@ -45,7 +45,7 @@ const Sneakers = () => {
   )
 
   return (
-    <div className="w-full max-w-[1430px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
+    <div className="w-full max-w-[1310px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
       <h2 className="text-xl sm:text-2xl lg:text-3xl text-center font-bold uppercase tracking-wide mb-10 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
         Ayaqqabilar
       </h2>

@@ -29,30 +29,23 @@ const Clothes = () => {
   // Kategoriya 13 olan məhsulları göstər
   const isCategory13 = (item: Product) => Number(item.categoryId ?? item.category?.id) === 13
 
-  // 7 gündən yeni məhsulları yoxla
-  const isLatest = (dateString?: string) => {
-    if (!dateString) return false
-    const diffDays = (Date.now() - new Date(dateString).getTime()) / (1000 * 60 * 60 * 24)
-    return diffDays <= 7
-  }
-
   return (
     <section className="w-full bg-gradient-to-b from-gray-50 to-white py-12 lg:py-16">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 lg:mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Geyim Kolleksiyası</h2>
           <p className="text-gray-600 text-lg">Ən son moda trendləri və keyfiyyətli geyimlər</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          <div className="w-full lg:w-1/2 relative group">
+          <div className="w-full lg:w-[600px] h-[600px] relative group">
             <div className="relative overflow-hidden rounded-2xl shadow-2xl">
               <Image
                 src="/img/clothes.jpg"
                 width={700}
                 height={850}
                 alt="Clothes collection"
-                className="w-full h-[500px] sm:h-[600px] lg:h-[850px] object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-[500px] sm:h-[500px] lg:h-[600px] object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
