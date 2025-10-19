@@ -7,6 +7,7 @@ import Bar from "./ui/header/Bar";
 import AccountMenu from "./ui/header/AccountMenu";
 import BagMenu from "./ui/header/BagMenu";
 import { fetchCategories } from "@/utils/fetchCategories";
+import Link from "next/link";
 
 const Header = () => {
   const router = useRouter();
@@ -97,19 +98,23 @@ const Header = () => {
           <nav>
             
   {/* Mobile Bar */}
-        <div className="hidden max-[1280px]:block">
+        <div className="hidden items-center max-[1280px]:block">
           <Bar onToggle={() => setToggleBar(prev => !prev)} isOpen={toggleBar} />
         </div>
         <ul className="flex space-x-6 text-gray-700 max-[1280px]:hidden font-medium text-base cursor-pointer select-none">
-  {categories.map((item) => (
-    <li
-      key={item.id}
-      className="relative pb-1 text-gray-700 hover:text-gray-900 transition-colors duration-200"
+ {categories.map((item) => (
+  <li key={item.id} className="relative pb-1 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+    <Link 
+      href={`/products?category=${item.slug}`}
+      className="block w-full h-full"
+      onClick={() => setToggleBar(false)}
     >
       {item.name}
-      <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-black transition-all duration-300 hover:w-full"></span>
-    </li>
-  ))}
+      <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full"></span>
+    </Link>
+  </li>
+))}
+
 </ul>
 
           </nav>

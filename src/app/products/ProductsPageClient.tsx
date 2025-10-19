@@ -7,7 +7,11 @@ import { applyCategoryFilter, applyColorFilter, applyPriceFilter, applySort } fr
 import type { Product } from "@/types/product";
 
 
-const ProductsPageClient = () => {
+interface ProductsPageClientProps {
+  categorySlug?: string;
+}
+
+const ProductsPageClient = ({ categorySlug }: ProductsPageClientProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -18,15 +22,26 @@ const ProductsPageClient = () => {
   const [maxPrice, setMaxPrice] = useState<number | "">("");
   const [selectedCategories, setSelectedCategories] = useState<Array<string | number>>([]);
   const [checked, setChecked] = useState<boolean[]>([]);
-
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       const prods = await getProducts();
       setProducts(prods || []);
+      
+      // If there's a category slug in the URL, filter products by it
+      if (categorySlug) {
+        const category = prods?.find(p => p.category?.slug === categorySlug)?.category;
+        if (category) {
+          setSelectedCategories([category.id]);
+        }
+      }
+      
       setFilteredProducts(prods || []);
+      setIsLoading(false);
     })();
-  }, []);
+  }, [categorySlug]);
 
 
   useEffect(() => {

@@ -45,7 +45,7 @@ const Sneakers = () => {
   )
 
   return (
-    <div className="w-full max-w-[1310px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
+    <div className="w-full max-w-[1430px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
       <h2 className="text-xl sm:text-2xl lg:text-3xl text-center font-bold uppercase tracking-wide mb-10 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
         Ayaqqabilar
       </h2>
@@ -71,7 +71,7 @@ const Sneakers = () => {
           </Swiper>
         </div>
       ) : (
-        <div className="max-w-[1280px] mx-auto w-full">
+        <div className="max-w-[1430px] mx-auto w-full">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
             {filteredProducts.map((item) => (
               <ProductCard key={item.id} item={item} /> 

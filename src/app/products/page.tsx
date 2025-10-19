@@ -1,5 +1,11 @@
 import ProductsPageClient from "./ProductsPageClient";
 
-export default function Page() {
-  return <ProductsPageClient />;
+interface PageProps {
+  searchParams: {
+    category?: string;
+  };
+}
+
+export default function Page({ searchParams }: PageProps) {
+  return <ProductsPageClient categorySlug={searchParams.category} />;
 }

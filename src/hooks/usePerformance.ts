@@ -13,6 +13,7 @@ export const usePerformanceMonitor = (componentName: string) => {
   const apiCalls = useRef<number>(0)
   const cacheHits = useRef<number>(0)
 
+  // Monitoring load time and rendering
   useEffect(() => {
     const loadTime = Date.now() - startTime.current
     console.log(`${componentName} loaded in ${loadTime}ms`)
@@ -20,7 +21,7 @@ export const usePerformanceMonitor = (componentName: string) => {
     return () => {
       const totalTime = Date.now() - startTime.current
       const cacheHitRate = apiCalls.current > 0 ? (cacheHits.current / apiCalls.current) * 100 : 0
-      
+
       console.log(`${componentName} Performance Metrics:`, {
         totalTime: `${totalTime}ms`,
         apiCalls: apiCalls.current,
@@ -35,42 +36,4 @@ export const usePerformanceMonitor = (componentName: string) => {
   }
 
   return { trackApiCall }
-}
-
-// Hook for measuring API response times
-export const useApiPerformance = () => {
-  const measurements = useRef<Map<string, number>>(new Map())
-
-  const startMeasurement = (key: string) => {
-    measurements.current.set(key, Date.now())
-  }
-
-  const endMeasurement = (key: string) => {
-    const startTime = measurements.current.get(key)
-    if (startTime) {
-      const duration = Date.now() - startTime
-      console.log(`API ${key} took ${duration}ms`)
-      measurements.current.delete(key)
-      return duration
-    }
-    return 0
-  }
-
-  return { startMeasurement, endMeasurement }
-}
-
-// Hook for detecting slow renders
-export const useRenderPerformance = (threshold = 16) => {
-  const renderStart = useRef<number>(0)
-
-  useEffect(() => {
-    renderStart.current = performance.now()
-  })
-
-  useEffect(() => {
-    const renderTime = performance.now() - renderStart.current
-    if (renderTime > threshold) {
-      console.warn(`Slow render detected: ${renderTime.toFixed(2)}ms (threshold: ${threshold}ms)`)
-    }
-  })
 }

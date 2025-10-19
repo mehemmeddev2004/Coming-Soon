@@ -30,7 +30,7 @@ const Clothes = () => {
   const isCategory13 = (item: Product) => Number(item.categoryId ?? item.category?.id) === 13
 
   return (
-    <section className="w-full bg-gradient-to-b from-gray-50 to-white py-12 lg:py-16">
+    <section className="w-full  py-12 lg:py-16">
       <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 lg:mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Geyim Kolleksiyası</h2>

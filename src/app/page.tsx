@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Clothes from "@/components/main/Clothes";
 
 import Kampaniya from "@/components/main/Kampaniya";
+import Kastyumlar from "@/components/main/Kastyumlar";
 
 import NewIn from "@/components/main/NewIn";
 
@@ -18,8 +19,8 @@ export default function Home() {
         <Kampaniya />
         <NewIn />
         <Sneakers/>
-
         <Clothes/>
+        <Kastyumlar/>
       </main>
 
    

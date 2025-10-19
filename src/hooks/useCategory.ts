@@ -11,8 +11,13 @@ export const useCategory = () => {
     img: "",
     parentId: ""
   })
+  const [loading, setLoading] = useState<boolean>(false)  // Loading state
+  const [error, setError] = useState<string | null>(null)  // Error state
 
+  // Load Categories
   const loadCategories = async () => {
+    setLoading(true)  // Start loading
+    setError(null)  // Reset error
     try {
       console.log("🔄 Loading categories...")
       const categoriesData = await fetchCategories()
@@ -29,10 +34,14 @@ export const useCategory = () => {
       }
     } catch (error) {
       console.error("❌ Kateqoriyalar yüklənmədi:", error)
-      setCategories([])
+      setError("Kateqoriyalar yüklənərkən xəta baş verdi.")  // Set error message
+      setCategories([])  // Clear categories
+    } finally {
+      setLoading(false)  // Stop loading
     }
   }
 
+  // Handle Add Category
   const handleAddCategory = async (): Promise<{ success: boolean; message: string }> => {
     if (!newCategory.name.trim()) {
       return { success: false, message: "Kateqoriya adı məcburidir!" }
@@ -61,40 +70,37 @@ export const useCategory = () => {
       if (result) {
         console.log("Category created successfully:", result)
         
-        // Option 1: Refresh categories list
+        // Refresh categories list (Option 1)
         await loadCategories()
-        
-        // Option 2: Manual add to state (backup method)
-        if (result.id) {
-          const newCategoryItem = {
-            id: result.id,
-            name: result.name || categoryData.name,
-            slug: result.slug || categoryData.slug,
-            imageUrl: result.imageUrl || categoryData.imageUrl,
-            parentId: result.parentId || categoryData.parentId,
-            createdAt: result.createdAt || new Date().toISOString(),
-            updatedAt: result.updatedAt || new Date().toISOString(),
-            children: [],
-            parent: null
-          }
-          
-          // Add to existing categories if not already there
-          const exists = categories.find(cat => cat.id === newCategoryItem.id)
-          if (!exists) {
-            console.log("Adding category manually to state:", newCategoryItem)
-            setCategories(prev => [...prev, newCategoryItem])
-          }
+
+        // Option 2: Add manually to state (backup method)
+        const newCategoryItem = {
+          id: result.id,
+          name: result.name || categoryData.name,
+          slug: result.slug || categoryData.slug,
+          imageUrl: result.imageUrl || categoryData.imageUrl,
+          parentId: result.parentId || categoryData.parentId,
+          createdAt: result.createdAt || new Date().toISOString(),
+          updatedAt: result.updatedAt || new Date().toISOString(),
+          children: [],
+          parent: null
         }
         
+        // Add to existing categories if not already there
+        const exists = categories.find(cat => cat.id === newCategoryItem.id)
+        if (!exists) {
+          console.log("Adding category manually to state:", newCategoryItem)
+          setCategories(prev => [...prev, newCategoryItem])
+        }
+
         setNewCategory({ name: "", slug: "", img: "", parentId: "" })
         setShowCategoryForm(false)
         return { success: true, message: "Kateqoriya uğurla əlavə edildi!" }
       } else {
-        console.log("Category creation failed")
         return { success: false, message: "Kateqoriya əlavə edilmədi" }
       }
     } catch (error: any) {
-      // Handle specific error messages
+      console.error("❌ Kateqoriya əlavə edərkən xəta:", error)
       if (error.message?.includes("already exists")) {
         return { success: false, message: "Bu kateqoriya artıq mövcuddur!" }
       }
@@ -110,6 +116,8 @@ export const useCategory = () => {
     newCategory,
     setNewCategory,
     loadCategories,
-    handleAddCategory
+    handleAddCategory,
+    loading,   // Loading state
+    error      // Error state
   }
 }
