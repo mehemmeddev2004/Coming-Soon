@@ -24,6 +24,7 @@ export default function NewIn() {
     async function fetchData() {
       try {
         const data = await getProducts()
+        console.log('📦 All products from API:', data.map(p => ({ id: p.id, name: p.name })))
         setProducts(data.slice(0, PRODUCT_LIMIT))
       } catch (error) {
         console.error("Məhsullar gətirilə bilmədi:", error)

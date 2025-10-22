@@ -36,10 +36,13 @@ const colorMap: Record<string, string> = {
 const ProductCard = ({ item }: { item: Product }) => {
   const isNewProduct = item.isNew || isLatest(item.createdAt || item.date)
   const imageUrl = item.images || item.img
+  
+  // Debug: Product ID-ni konsola yaz
+  console.log('ProductCard - Product ID:', item.id, 'Name:', item.name);
 
   return (
     <Link
-      href={`/product/${item.id}?${queryString}`}
+      href={`/product/${item.id}`}
       className="group block overflow-hidden bg-white relative" // burada relative əlavə edildi
     >
       <div>

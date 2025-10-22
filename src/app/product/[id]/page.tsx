@@ -1,84 +1,69 @@
-import { getProductById } from "@/utils/fetchProducts"
-import { redirect } from "next/navigation"
-import ProductContent from "./ProductContent"
+'use client';
 
-type Props = {
-  params: Promise<{ id: string }>
-}
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { getProductById } from "@/utils/fetchProducts";
+import ProductContent from "./ProductContent";
+import { Product } from "@/types/product";
 
-const fallbackImages = [
-  {
-    id: "1",
-    url: "https://media.endclothing.com/media/f_auto,q_auto:eco,w_1600/prodmedia/media/catalog/product/0/9/09-09-2025-ns_jv6464_1.jpg",
-  },
-  {
-    id: "2",
-    url: "https://media.endclothing.com/media/f_auto,q_auto:eco,w_1600/prodmedia/media/catalog/product/0/9/09-09-2025-ns_jv6464_7.jpg",
-  },
-  {
-    id: "3",
-    url: "https://media.endclothing.com/media/f_auto,q_auto:eco,w_1600/prodmedia/media/catalog/product/0/9/09-09-2025-ns_jv6464_8.jpg",
-  },
-]
+export default function ProductPage() {
+  const params = useParams();
+  const productId = params?.id as string;
+  
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-// SEO metadata
-export async function generateMetadata({ params }: Props) {
-  const resolvedParams = await params
-  let product = null
-  try {
-    product = await getProductById(Number(resolvedParams.id))
-  } catch (error) {
-    console.error("Failed to fetch product for metadata:", error)
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!productId) return;
+      
+      setLoading(true);
+      try {
+        console.log('Fetching product with ID:', productId);
+        const productData = await getProductById(Number(productId));
+        
+        if (!productData) {
+          throw new Error('Product not found');
+        }
+
+        console.log('Product data received:', productData);
+        setProduct(productData);
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading product...</p>
+      </div>
+    );
   }
 
-  return {
-    title: product ? product.name : "Product not found",
-    description: product?.description 
-      ? Array.isArray(product.description) 
-        ? product.description.join(", ") 
-        : product.description
-      : "Check out our product",
-  }
-}
-
-const ProductPage = async ({ params }: Props) => {
-  const resolvedParams = await params
-  const productId = Number(resolvedParams.id)
-  console.log("ProductPage params:", resolvedParams)
-  console.log("Product ID:", productId)
-  console.log(`🔍 Fetching product from: http://localhost:3001/api/products/${productId}`)
-
-  let product
-
-  try {
-    product = await getProductById(productId)
-    if (!product) {
-      console.error(`❌ Product not found or fetch failed for product ${productId}. Possible reasons: network/server error, product does not exist.`)
-      redirect("/")
-      return null
-    }
-    console.log("Fetched product:", product)
-  } catch (error: any) {
-    console.error(`❌ Exception while fetching product ${productId}:`, error)
-    console.error("❌ Error type:", typeof error)
-    console.error("❌ Error message:", error?.message)
-    if (error?.message === "fetch failed") {
-      console.error("❌ Network/server error: Unable to reach API endpoint or endpoint returned error.")
-    }
-    redirect("/")
-    return null
+  if (error || !product) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">{error || 'Product not found'}</p>
+      </div>
+    );
   }
 
-  const galleryImages =
-    Array.isArray(product.images) && product.images.length > 0
-      ? product.images.map((url: string, idx: number) => ({
-          id: String(idx + 1),
-          url,
-        }))
-      : fallbackImages
+  const galleryImages = Array.isArray(product.images) && product.images.length > 0
+    ? product.images.map((url: string, idx: number) => ({
+        id: String(idx + 1),
+        url,
+      }))
+    : [];
 
-  const mainImage =
-    product.images?.[0] || product.img || fallbackImages[0].url
+  const mainImage = product.img || galleryImages[0]?.url || '';
 
   return (
     <ProductContent
@@ -86,7 +71,5 @@ const ProductPage = async ({ params }: Props) => {
       galleryImages={galleryImages}
       mainImage={mainImage}
     />
-  )
+  );
 }
-
-export default ProductPage

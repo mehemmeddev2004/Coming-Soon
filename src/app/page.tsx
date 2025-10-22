@@ -3,11 +3,12 @@ import Header from "@/components/Header";
 import Clothes from "@/components/main/Clothes";
 
 import Kampaniya from "@/components/main/Kampaniya";
-import Kastyumlar from "@/components/main/Kastyumlar";
+
 
 import NewIn from "@/components/main/NewIn";
 
 import Sneakers from "@/components/main/Sneakers";
+import Social from "@/components/main/Social";
 
 
 export default function Home() {
@@ -20,7 +21,7 @@ export default function Home() {
         <NewIn />
         <Sneakers/>
         <Clothes/>
-        <Kastyumlar/>
+        <Social/>
       </main>
 
    

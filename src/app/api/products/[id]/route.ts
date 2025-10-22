@@ -10,6 +10,8 @@ export async function GET(
   try {
     const { id } = await params;
     
+    console.log(`🔍 Requesting product with ID: ${id} from backend`);
+    
     const response = await fetch(`https://etor.onrender.com/api/products/${id}`, {
       method: 'GET',
       headers: {
@@ -18,7 +20,7 @@ export async function GET(
       },
     });
 
-    console.log('📥 Backend response status:', response.status);
+    console.log(`📥 Backend response status for ID ${id}:`, response.status);
     
     const responseText = await response.text();
 
@@ -38,32 +40,18 @@ export async function GET(
     
     if (!response.ok) {
       console.log('❌ Backend error:', data);
+      console.log(`❌ Product with ID ${id} not found on backend`);
       
-      // If product not found, try to get the first available product as fallback
+      // If product not found (404), return a more user-friendly message
       if (response.status === 404) {
-        console.log('🔄 Product not found, trying to get first available product...');
-        try {
-          const fallbackResponse = await fetch(`https://etor.onrender.com/api/products`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'User-Agent': 'NextJS-Proxy/1.0',
-            },
-          });
-          
-          if (fallbackResponse.ok) {
-            const fallbackText = await fallbackResponse.text();
-            const fallbackData = JSON.parse(fallbackText);
-            
-            // If we get an array of products, return the first one
-            if (Array.isArray(fallbackData) && fallbackData.length > 0) {
-              console.log('✅ Using first available product as fallback');
-              return NextResponse.json(fallbackData[0], { status: 200 });
-            }
-          }
-        } catch (fallbackError) {
-          console.error('❌ Fallback failed:', fallbackError);
-        }
+        return NextResponse.json(
+          { 
+            message: 'Məhsul tapılmadı',
+            statusCode: 404,
+            details: `ID ${id} ilə məhsul mövcud deyil. Zəhmət olmasa əsas səhifəyə qayıdın.`
+          },
+          { status: 404 }
+        );
       }
       
       return NextResponse.json(

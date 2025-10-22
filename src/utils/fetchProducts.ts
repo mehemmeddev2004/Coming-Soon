@@ -99,6 +99,7 @@ export const getProducts = async (): Promise<Product[]> => {
 ===================================================== */
 export const getProductById = async (id: string | number): Promise<Product | null> => {
   try {
+    // First, try to get the product from the local API
     const url = getUrl(`/${id}`)
     console.log(`🔍 Fetching product from: ${url}`)
     
@@ -113,38 +114,33 @@ export const getProductById = async (id: string | number): Promise<Product | nul
 
     console.log(`📥 Response status: ${response.status}`)
 
-    // Try to get the response data even if status is not ok
-    const responseText = await response.text()
-    console.log(`📄 Response text length: ${responseText.length}, content: ${responseText.substring(0, 200)}...`)
-
-    let data
-    try {
-      data = JSON.parse(responseText)
-      console.log(`📋 Parsed data:`, data)
-    } catch (parseError) {
-      console.error(`❌ Failed to parse response JSON:`, parseError)
-      console.error(`❌ Raw response text:`, responseText)
-      return null
-    }
-
-    // If we got data (even with non-200 status), and it looks like a product, return it
-    if (data && typeof data === 'object' && (data.id || data._id || data.name)) {
-      console.log(`✅ Got product data: ${data.name || data.id}`)
+    if (response.ok) {
+      const data = await response.json()
+      console.log(`✅ Product found:`, data)
       return data
     }
 
-    if (!response.ok) {
-      console.error(`❌ Product ${id} not found: ${response.status}`, data)
-      return null
+    // If 404, try to get all products and find by ID
+    console.log(`⚠️ Product ${id} not found via direct API, trying to fetch from all products...`)
+    const allProducts = await getProducts()
+    console.log(`📦 Checking ${allProducts.length} products for ID ${id}`)
+    
+    const numId = Number(id)
+    const strId = String(id)
+    const product = allProducts.find(p => {
+      const productId = typeof p.id === 'number' ? p.id : Number(p.id)
+      return productId === numId || String(p.id) === strId
+    })
+    
+    if (product) {
+      console.log(`✅ Found product in list:`, product)
+      return product
     }
 
-    console.log(`✅ Returning product data:`, data)
-    return data || null
+    console.error(`❌ Product ${id} not found anywhere`)
+    return null
   } catch (err) {
     console.error(`❌ Failed to fetch product ${id}:`, err)
-    console.error(`❌ Error type:`, typeof err)
-    console.error(`❌ Error message:`, err instanceof Error ? err.message : 'Unknown error')
-    console.error(`❌ Error stack:`, err instanceof Error ? err.stack : 'No stack trace')
     return null
   }
 }

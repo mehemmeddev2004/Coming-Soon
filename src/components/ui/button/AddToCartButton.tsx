@@ -9,6 +9,7 @@ type Props = {
   price: number | string;
   className?: string;
   children?: React.ReactNode;
+  disabled?: boolean;
 };
 
 const AddToCartButton: React.FC<Props> = ({ 
@@ -16,7 +17,8 @@ const AddToCartButton: React.FC<Props> = ({
   name, 
   price, 
   className, 
-  children 
+  children,
+  disabled = false 
 }) => {
   const { addItem } = useCart();
 
@@ -34,6 +36,7 @@ const AddToCartButton: React.FC<Props> = ({
       onClick={onClick} 
       className={className} 
       type="button"
+      disabled={disabled}
     >
       {children ?? <span>Add to Cart</span>}
     </button>
