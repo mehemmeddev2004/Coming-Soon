@@ -31,28 +31,26 @@ const Clothes = () => {
 
   return (
     <section className="w-full  py-12 lg:py-16">
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 lg:mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Geyim Kolleksiyası</h2>
-          <p className="text-gray-600 text-lg">Ən son moda trendləri və keyfiyyətli geyimlər</p>
-        </div>
+      <div className="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8">
+       
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          <div className="w-full lg:w-[600px] h-[600px] relative group">
-            <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+         <div className="">
+           <div className="flex flex-col mb-[50px] gap-[10px] justify-between">
+            <span className="flex items-center gap-3 "><div className="w-[7px] h-2 bg-black"></div><span className="text-[20px] font-[600] leading-[30px] tracking-[0.157143rem] uppercase font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Geyim Kolleksiyası</span></span>
+
+           <span className="text-[1rem] font-[400] leading-[22px] tracking-[0.02rem] text-[#999999] no-underline block ml-[20px] font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Ən son moda trendləri və keyfiyyətli geyimlər</span>
+          </div>
+          <div className="w-full lg:w-[676px] h-[676px] relative group">
               <Image
                 src="/img/clothes.jpg"
                 width={700}
                 height={850}
                 alt="Clothes collection"
-                className="w-full h-[500px] sm:h-[500px] lg:h-[600px] object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-[676px] sm:h-[500px] lg:h-[676px] object-cover "
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
-                <p className="text-sm font-semibold text-gray-900">Yeni Kolleksiya 2025</p>
-              </div>
-            </div>
           </div>
+         </div>
 
           <div className="w-full lg:w-1/2">
             {loading ? (

@@ -17,15 +17,19 @@ const Sneakers = () => {
   const [products, setProducts] = useState<Product[]>([])
   const { addItem } = useCart()
   const [isMobile, setIsMobile] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   // ✅ Məhsulları gətir
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       try {
         const fetchedProducts = await getProducts()
         setProducts(Array.isArray(fetchedProducts) ? fetchedProducts : [])
       } catch (error) {
         console.error("Error fetching products:", error)
+      } finally {
+        setLoading(false)
       }
     }
     fetchData()
@@ -45,10 +49,13 @@ const Sneakers = () => {
   )
 
   return (
-    <div className="w-full max-w-[1430px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
-      <h2 className="text-xl sm:text-2xl lg:text-3xl text-center font-bold uppercase tracking-wide mb-10 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-        Ayaqqabilar
-      </h2>
+    <div className="w-full max-w-[1470px] mx-auto flex flex-col px-4 py-6 sm:p-6 md:p-8">
+     <div className=" pb-[32px]">
+     <div className="flex justify-between items-center">
+      <span className="text-[20px] font-[600] leading-[30px] tracking-[0.157143rem] uppercase font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Ayaqqabilar</span>
+      <span className="text-[1rem] font-[400]   decoration-black decoration-2 leading-[22px] tracking-[0.02rem] text-[#999999] no-underline block ml-[20px] font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Hamisina baxin</span>
+     </div>
+    </div>
       {isMobile ? (
         <div className="overflow-hidden -mx-4 px-4">
           <Swiper
@@ -63,19 +70,31 @@ const Sneakers = () => {
             grabCursor
             className="!overflow-visible"
           >
-            {filteredProducts.map((item) => (
-              <SwiperSlide key={item.id}>
-                <ProductCard item={item} /> {/* ✅ Artıq buradan çağırırıq */}
-              </SwiperSlide>
-            ))}
+            {loading
+              ? Array(5)
+                  .fill(null)
+                  .map((_, i) => (
+                    <SwiperSlide key={i}>
+                      <ProductCard isLoading />
+                    </SwiperSlide>
+                  ))
+              : filteredProducts.map((item) => (
+                  <SwiperSlide key={item.id}>
+                    <ProductCard item={item} />
+                  </SwiperSlide>
+                ))}
           </Swiper>
         </div>
       ) : (
         <div className="max-w-[1430px] mx-auto w-full">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
-            {filteredProducts.map((item) => (
-              <ProductCard key={item.id} item={item} /> 
-            ))}
+            {loading
+              ? Array(10)
+                  .fill(null)
+                  .map((_, i) => <ProductCard key={i} isLoading />)
+              : filteredProducts.map((item) => (
+                  <ProductCard key={item.id} item={item} />
+                ))}
           </div>
         </div>
       )}

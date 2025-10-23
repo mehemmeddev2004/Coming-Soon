@@ -49,9 +49,13 @@ const RandomProduct = () => {
 
   return (
     <div className='mt-[40px]'>
-   <h2 className="text-xl sm:text-2xl lg:text-2xl text-center font-bold tracking-wide mb-10 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-       Diger mehsullarimiza goz ata bilersiniz
-      </h2>
+   <div className=" pb-[32px]">
+     <div className="flex justify-between items-center">
+      <span className="text-[20px] font-[600] leading-[30px] tracking-[0.157143rem] uppercase font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Bunlar da Maraqlı Ola bilər
+</span>
+      <span className="text-[1rem] font-[400]   decoration-black decoration-2 leading-[22px] tracking-[0.02rem] text-[#999999] no-underline block ml-[20px] font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Hamisina baxin</span>
+     </div>
+    </div>
            {isMobile ? (
         <div className="overflow-hidden -mx-4 px-4">
           <Swiper

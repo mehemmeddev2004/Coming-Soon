@@ -93,7 +93,15 @@ const ProductsPageClient = ({ categorySlug }: ProductsPageClientProps) => {
       </div>
 
 
-      {filteredProducts.length ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 w-full">
+          {Array(9)
+            .fill(null)
+            .map((_, i) => (
+              <ProductCard key={i} isLoading />
+            ))}
+        </div>
+      ) : filteredProducts.length ? (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3  w-full">
           {filteredProducts.map((product, idx) => (
             product && typeof product === "object" ? (
