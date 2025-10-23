@@ -1,11 +1,12 @@
 import ProductsPageClient from "./ProductsPageClient";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
-  };
+  }>;
 }
 
-export default function Page({ searchParams }: PageProps) {
-  return <ProductsPageClient categorySlug={searchParams.category} />;
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  return <ProductsPageClient categorySlug={params.category} />;
 }
