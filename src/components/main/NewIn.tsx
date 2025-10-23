@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getProducts } from "@/utils/fetchProducts"
+import { useProducts } from "@/hooks/useProducts"
 import { useCart } from "@/providers/CartProvider"
 import type { Product } from "@/types/product"
 import { Swiper, SwiperSlide } from "swiper/react"
@@ -16,26 +16,10 @@ const PRODUCT_LIMIT = 10
 const MOBILE_BREAKPOINT = 991
 
 export default function NewIn() {
-  const [products, setProducts] = useState<Product[]>([])
+  const { data: allProducts = [], isLoading: loading } = useProducts()
+  const products = allProducts.slice(0, PRODUCT_LIMIT)
   const [isMobile, setIsMobile] = useState(false)
-  const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
-
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true)
-      try {
-        const data = await getProducts()
-        console.log('📦 All products from API:', data.map(p => ({ id: p.id, name: p.name })))
-        setProducts(data.slice(0, PRODUCT_LIMIT))
-      } catch (error) {
-        console.error("Məhsullar gətirilə bilmədi:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
 
   useEffect(() => {
     function handleResize() {

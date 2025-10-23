@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ProductFilter from "@/components/ui/product/ProductFilter";
-import { getProducts } from "@/utils/fetchProducts";
+import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "@/components/ui/product/ProductCard";
 import { applyCategoryFilter, applyColorFilter, applyPriceFilter, applySort } from "@/utils/productFilters";
 import type { Product } from "@/types/product";
@@ -12,8 +12,7 @@ interface ProductsPageClientProps {
 }
 
 const ProductsPageClient = ({ categorySlug }: ProductsPageClientProps) => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const { data: products = [], isLoading } = useProducts();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [selectedSort, setSelectedSort] = useState<string>("");
@@ -22,46 +21,37 @@ const ProductsPageClient = ({ categorySlug }: ProductsPageClientProps) => {
   const [maxPrice, setMaxPrice] = useState<number | "">("");
   const [selectedCategories, setSelectedCategories] = useState<Array<string | number>>([]);
   const [checked, setChecked] = useState<boolean[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
+  // Set category from URL slug only once when products load
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const prods = await getProducts();
-      setProducts(prods || []);
-      
-      // If there's a category slug in the URL, filter products by it
-      if (categorySlug) {
-        const category = prods?.find(p => p.category?.slug === categorySlug)?.category;
-        if (category) {
-          setSelectedCategories([category.id]);
-        }
+    if (products.length > 0 && categorySlug && selectedCategories.length === 0) {
+      const category = products.find(p => p.category?.slug === categorySlug)?.category;
+      if (category) {
+        setSelectedCategories([category.id]);
       }
-      
-      setFilteredProducts(prods || []);
-      setIsLoading(false);
-    })();
-  }, [categorySlug]);
+    }
+  }, [products, categorySlug]);
 
-
-  useEffect(() => {
+  // Use useMemo to compute filtered products without causing re-renders
+  const filteredProducts = useMemo(() => {
     const noFilters =
       !selectedCategories.length &&
       !selectedColor &&
       !selectedSort &&
       minPrice === "" &&
       maxPrice === "";
+    
     if (noFilters) {
-      setFilteredProducts(products);
-      return;
+      return products;
     }
+    
     let local = [...products];
     local = applyCategoryFilter(local, selectedCategories);
     local = applyColorFilter(local, selectedColor);
     local = applyPriceFilter(local, minPrice, maxPrice);
     local = applySort(local, selectedSort);
-    setFilteredProducts(local);
-  }, [selectedCategories, selectedColor, selectedSort, minPrice, maxPrice, products]);
+    return local;
+  }, [products, selectedCategories, selectedColor, selectedSort, minPrice, maxPrice]);
 
 
   const toggleSection = (key: string) =>
@@ -69,15 +59,13 @@ const ProductsPageClient = ({ categorySlug }: ProductsPageClientProps) => {
   const toggleFilters = () => setFiltersOpen((prev) => !prev);
 
 
-  const resetFilters = async () => {
+  const resetFilters = () => {
     setSelectedCategories([]);
     setSelectedColor(null);
     setSelectedSort("");
     setMinPrice("");
     setMaxPrice("");
     setChecked([]);
-    const all = await getProducts();
-    setFilteredProducts(all || []);
   };
 
 

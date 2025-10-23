@@ -1,30 +1,13 @@
 "use client"
 
 import type { Product } from "@/types/product"
-import { getProducts } from "@/utils/fetchProducts"
+import { useProducts } from "@/hooks/useProducts"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 import ProductCard from "../ui/product/ProductCard"
 
 
 const Clothes = () => {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  // Məhsulları gətir
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response: Product[] = await getProducts()
-        setProducts(response)
-      } catch (error) {
-        console.error("Məhsullar gətirilə bilmədi:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
+  const { data: products = [], isLoading: loading } = useProducts()
 
   // Kategoriya 13 olan məhsulları göstər
   const isCategory13 = (item: Product) => Number(item.categoryId ?? item.category?.id) === 13

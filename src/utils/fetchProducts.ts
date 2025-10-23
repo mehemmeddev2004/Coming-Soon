@@ -1,4 +1,3 @@
-import axios from "axios"
 import { Product } from "@/types/product"
 
 /* =====================================================
@@ -155,8 +154,17 @@ export const createProduct = async (data: CreateProductData): Promise<Product | 
     const url = `/api/products/category/${data.categoryId}`
     const { categoryId: _, specs: __, variants: ___, ...body } = data
 
-    const res = await axios.post(url, body, { headers: getAuthHeaders() })
-    return res.data
+    const response = await fetch(url, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to create product: ${response.status}`)
+    }
+
+    return await response.json()
   } catch (err) {
     console.error("❌ Məhsul əlavə olunmadı:", err)
     return null
@@ -176,8 +184,18 @@ export const createProductSpecs = async (
     const results = []
 
     for (const spec of specs) {
-      const res = await axios.post(url, spec, { headers })
-      results.push(res.data)
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(spec),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to create spec: ${response.status}`)
+      }
+
+      const data = await response.json()
+      results.push(data)
     }
 
     return results
@@ -200,8 +218,18 @@ export const createProductVariants = async (
     const results = []
 
     for (const variant of variants) {
-      const res = await axios.post(url, variant, { headers })
-      results.push(res.data)
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(variant),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to create variant: ${response.status}`)
+      }
+
+      const data = await response.json()
+      results.push(data)
     }
 
     return results
@@ -216,8 +244,17 @@ export const createProductVariants = async (
 ===================================================== */
 export const updateProduct = async (id: string | number, data: Partial<Product>) => {
   try {
-    const res = await axios.put(`${BASE_URL}/${id}`, data, { headers: getAuthHeaders() })
-    return res.data
+    const response = await fetch(`${BASE_URL}/${id}`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to update product: ${response.status}`)
+    }
+
+    return await response.json()
   } catch (err) {
     console.error(`❌ Failed to update product ${id}:`, err)
     return null
@@ -229,8 +266,16 @@ export const updateProduct = async (id: string | number, data: Partial<Product>)
 ===================================================== */
 export const deleteProduct = async (id: string | number) => {
   try {
-    const res = await axios.delete(`${BASE_URL}/${id}`, { headers: getAuthHeaders() })
-    return res.data
+    const response = await fetch(`${BASE_URL}/${id}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete product: ${response.status}`)
+    }
+
+    return await response.json()
   } catch (err) {
     console.error(`❌ Failed to delete product ${id}:`, err)
     return null
@@ -242,8 +287,18 @@ export const deleteProduct = async (id: string | number) => {
 ===================================================== */
 export const filterProducts = async (filters: FilterData): Promise<Product[]> => {
   try {
-    const res = await axios.post(`${BASE_URL}/filter`, filters, { headers: getAuthHeaders() })
-    return Array.isArray(res.data) ? res.data : []
+    const response = await fetch(`${BASE_URL}/filter`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(filters),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Filter failed: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return Array.isArray(data) ? data : []
   } catch (err) {
     console.error("❌ Filter failed:", err)
     return []
@@ -260,8 +315,17 @@ export const getFilteredProducts = async (filters: FilterData & { page?: number;
       if (val !== undefined && val !== null) params.append(key, String(val))
     })
 
-    const res = await axios.get(`${BASE_URL}?${params.toString()}`, { headers: getAuthHeaders() })
-    return Array.isArray(res.data) ? res.data : []
+    const response = await fetch(`${BASE_URL}?${params.toString()}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to get filtered products: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return Array.isArray(data) ? data : []
   } catch (err) {
     console.error("❌ Failed to get filtered products:", err)
     return []

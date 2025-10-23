@@ -6,15 +6,15 @@ import Filter from "./ui/header/Filter";
 import Bar from "./ui/header/Bar";
 import AccountMenu from "./ui/header/AccountMenu";
 import BagMenu from "./ui/header/BagMenu";
-import { fetchCategories } from "@/utils/fetchCategories";
+import { useCategories } from "@/hooks/useCategories";
 import Link from "next/link";
 
 const Header = () => {
   const router = useRouter();
+  const { data: categories = [] } = useCategories();
   const [toggleSearch, setToggleSearch] = useState(false);
   const [toggleBar, setToggleBar] = useState(false);
   const [userInitial, setUserInitial] = useState<string>("");
-  const [categories, setCategories] = useState<any[]>([]);
   const [userBoxOpen, setUserBoxOpen] = useState(false); // user menu
   const [bagBoxOpen, setBagBoxOpen] = useState(false); // bag menu
   const [userData, setUserData] = useState<{ email: string; username: string } | null>(null);
@@ -42,23 +42,6 @@ const Header = () => {
     }
   }, []);
 
-  // categories fetch
-  useEffect(() => {
-    const fetchCategoriesData = async () => {
-      try {
-        const data = await fetchCategories();
-        if (Array.isArray(data)) {
-          setCategories(data);
-        } else {
-          setCategories([]);
-          console.error("Categories is not an array:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-    fetchCategoriesData();
-  }, []);
 
   const icons = [
     { id: "1", img: "/img/search.svg", alt: "Search icon" },

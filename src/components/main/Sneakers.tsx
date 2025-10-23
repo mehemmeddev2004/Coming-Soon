@@ -1,7 +1,7 @@
 "use client"
 
 import { useCart } from "@/providers/CartProvider"
-import { getProducts } from "@/utils/fetchProducts"
+import { useProducts } from "@/hooks/useProducts"
 import type { Product } from "@/types/product"
 import { useEffect, useState } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
@@ -14,26 +14,9 @@ import "swiper/css/pagination"
 import ProductCard from "../ui/product/ProductCard"
 
 const Sneakers = () => {
-  const [products, setProducts] = useState<Product[]>([])
+  const { data: products = [], isLoading: loading } = useProducts()
   const { addItem } = useCart()
   const [isMobile, setIsMobile] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  // ✅ Məhsulları gətir
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const fetchedProducts = await getProducts()
-        setProducts(Array.isArray(fetchedProducts) ? fetchedProducts : [])
-      } catch (error) {
-        console.error("Error fetching products:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
 
   // ✅ Ekran ölçüsünə görə layout
   useEffect(() => {
