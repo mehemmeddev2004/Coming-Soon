@@ -12,6 +12,7 @@ export type Product = {
   imageUrl?: string;
   price: number | string; // API-də string gəlir, lazım gələrsə number-a çevir
   stock: number;
+  discount?: number;
   isActive?: boolean;
   isNew?: boolean;
   date?: string;

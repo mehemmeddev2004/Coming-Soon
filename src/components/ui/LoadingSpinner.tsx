@@ -54,9 +54,13 @@ export const SkeletonList: React.FC<{ items?: number; className?: string }> = ({
 // Full page loading
 export const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-screen">
-    <div className="text-center">
-      <LoadingSpinner size="lg" className="mx-auto mb-4" />
-      <p className="text-gray-600">Loading...</p>
+    <div
+      className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-black border-e-transparent align-[-0.125em] text-black"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span className="sr-only">Loading...</span>
     </div>
   </div>
 )

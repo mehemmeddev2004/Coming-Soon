@@ -42,7 +42,7 @@ const AddToCartButton: React.FC<Props> = ({
   stock,
   specs
 }) => {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   const router = useRouter();
 
   const onClick = () => {
@@ -53,6 +53,16 @@ const AddToCartButton: React.FC<Props> = ({
     if (!user || !token || user === "undefined" || user === "null") {
       // İstifadəçi login olmayıb - login səhifəsinə yönləndir
       router.push("/login");
+      return;
+    }
+
+    // Eyni məhsul və ölçü artıq səbətdə varsa, əlavə etmə
+    const existingItem = items.find(
+      (item) => item.id === id && item.size === size
+    );
+
+    if (existingItem) {
+      // Məhsul artıq səbətdə var
       return;
     }
 

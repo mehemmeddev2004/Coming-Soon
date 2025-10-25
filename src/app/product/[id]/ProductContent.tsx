@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddToCartButton from '@/components/ui/button/AddToCartButton';
 import ProductGallery from '@/components/ui/product/ProductGallery';
 import type { Product } from '@/types/product';
@@ -17,13 +17,55 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
   const currentSlug = usePathname();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('Description');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  useEffect(() => {
+    // Simulate loading or wait for product data
+    if (product) {
+      setIsLoading(false);
+    }
+  }, [product]);
+
+
   const tabItems = ['Description', 'Sizing', 'Shipping', 'Returns'];
+
+  // Color mapping for product specs
+  const colorMap: Record<string, string> = {
+    'black': '#000000',
+    'white': '#FFFFFF',
+    'red': '#EF4444',
+    'blue': '#3B82F6',
+    'green': '#10B981',
+    'yellow': '#F59E0B',
+    'purple': '#A855F7',
+    'pink': '#EC4899',
+    'gray': '#6B7280',
+    'grey': '#6B7280',
+    'brown': '#92400E',
+    'beige': '#D4C5B9',
+    'navy': '#1E3A8A',
+    'orange': '#F97316',
+  };
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size === selectedSize ? null : size);
   };
+
+  // Loading Screen Component
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-[#332d2d] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+          role="status"
+        >
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -44,50 +86,81 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
 
         <div className="flex flex-col space-y-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
+            <h1 className=" mb-[5px] font-[Georgia,serif] text-[1rem] font-normal tracking-[.05em] leading-[1.333em] md:text-[1.125rem]">
               {product.name}
             </h1>
-            <p className="text-xl font-medium text-gray-900">
+            <p className="text-[13px] text-gray-600">
               {typeof product.price === 'string' && !product.price.startsWith('AZN')
                 ? `${product.price} AZN`
                 : product.price}
             </p>
           </div>
-
+          <span className='w-full h-[1px] bg-gray-300'></span>
           {product.specs && product.specs.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {product.specs.flatMap((spec) =>
-                spec.values?.map((value) => (
-                  <span
-                    key={`${spec.id}-${value.id}`}
-                    className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-md"
-                  >
-                    {value.value}
-                  </span>
-                ))
-              )}
+            <div>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {product.specs.flatMap((spec) =>
+                  spec.values?.map((value) => (
+                    <span
+                      key={`${spec.id}-${value.id}`}
+                      className="text-[13px] uppercase text-gray-600"
+                    >
+                      COLOR: {value.value}
+                    </span>
+                  ))
+                )}
+              </div>
+              <div className="flex gap-1.5 bg-white/90 backdrop-blur-sm p-[2px] rounded-full shadow-inner w-fit">
+                {product.specs.map((spec, specIndex) =>
+                  spec?.values && Array.isArray(spec.values)
+                    ? spec.values.slice(0, 4).map((v, valIndex) => {
+                        const colorKey = v.value?.toLowerCase() ?? ""
+                        const bgColor =
+                          colorMap[colorKey] ?? v.value?.toLowerCase() ?? "#f3f4f6"
+
+                        return (
+                          <span
+                            key={v?.id ?? `${specIndex}-${valIndex}`}
+                            className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                            style={{ backgroundColor: bgColor }}
+                            title={v?.value || "Color option"}
+                          />
+                        )
+                      })
+                    : null
+                )}
+              </div>
             </div>
           )}
-
+  <span className='w-full h-[1px] bg-gray-300'></span>
           <div>
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-sm font-medium text-gray-900">Select a size</h3>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {sizes.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => handleSizeSelect(size)}
-                  className={`h-12 px-4 border rounded-md text-sm font-medium transition-colors ${
-                    selectedSize === size
-                      ? 'bg-black text-white border-black'
-                      : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+              {product.sizes && product.sizes.length > 0 ? (
+                product.sizes.map((size, index) => {
+                  const sizeValue = typeof size === 'string' ? size : size.value;
+                  const sizeKey = typeof size === 'string' ? size : size.id;
+                  
+                  return (
+                    <button
+                      key={sizeKey || index}
+                      type="button"
+                      onClick={() => handleSizeSelect(sizeValue)}
+                      className={`h-12 px-4 border rounded-md text-sm font-medium transition-colors ${
+                        selectedSize === sizeValue
+                          ? 'bg-black text-white border-black'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                      }`}
+                    >
+                      {sizeValue}
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="col-span-3 text-sm text-gray-500">No sizes available</p>
+              )}
             </div>
           </div>
 
@@ -100,6 +173,8 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
                 ? parseFloat(product.price.replace(/[^0-9.,]/g, ''))
                 : product.price}
             size={selectedSize || undefined}
+            color={product.specs?.[0]?.values?.[0]?.value}
+            specs={product.specs}
             image={mainImage || product.img || product.imageUrl}
             className={`w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
               !selectedSize ? 'opacity-50 cursor-not-allowed' : ''
@@ -133,7 +208,7 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
                 <div className="prose max-w-none">
                   {product.description ? (
                     Array.isArray(product.description) ? (
-                      <ul className=" pl-5 space-y-1">
+                      <ul className="">
                         {product.description.map((line, idx) => (
                           <li key={idx}>{line}</li>
                         ))}

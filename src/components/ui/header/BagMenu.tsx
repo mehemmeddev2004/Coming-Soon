@@ -110,7 +110,19 @@ const BagMenu: React.FC<BagMenuProps> = ({ onToggle, isOpen }) => {
                       <div className="w-full h-[1px] bg-gray-300 my-2" />
                       <p className="text-gray-600 text-xs md:text-[13px]">Size: {item.size || "N/A"}</p>
 
-                      {item.color && <p className="text-gray-600 text-xs md:text-[13px]">Color: {item.color}</p>}
+                      {item.color && (
+                        <div className="flex items-center gap-2 text-gray-600 text-xs md:text-[13px]">
+                          <span>Color: {item.color}</span>
+                          <span
+                            className="w-4 h-4 md:w-5 md:h-5 rounded-full border border-gray-300"
+                            style={{
+                              backgroundColor:
+                                colorMap[item.color.toLowerCase?.() ?? ""] ?? item.color.toLowerCase?.() ?? "#f3f4f6",
+                            }}
+                            title={item.color}
+                          />
+                        </div>
+                      )}
 
                       {item.specs && Array.isArray(item.specs) && (
                         <div className="flex gap-1.5 p-[2px] rounded-full mt-2">

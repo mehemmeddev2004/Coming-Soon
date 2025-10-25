@@ -51,7 +51,7 @@ const RandomProduct = () => {
     <div className='mt-[40px]'>
    <div className=" pb-[32px]">
      <div className="flex justify-between items-center">
-      <span className="text-[20px] font-[600] leading-[30px] tracking-[0.157143rem] uppercase font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Bunlar da Maraqlı Ola bilər
+      <span className="font-[Georgia,serif] text-[1rem] font-normal tracking-[.05em] leading-[1.333em] md:text-[1.125rem]">Related Products
 </span>
       <span className="text-[1rem] font-[400]   decoration-black decoration-2 leading-[22px] tracking-[0.02rem] text-[#999999] no-underline block ml-[20px] font-[Proxima Nova,'Helvetica Neue',Verdana,Arial,sans-serif]">Hamisina baxin</span>
      </div>
