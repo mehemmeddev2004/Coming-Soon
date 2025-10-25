@@ -99,6 +99,8 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
               : typeof product.price === 'string'
                 ? parseFloat(product.price.replace(/[^0-9.,]/g, ''))
                 : product.price}
+            size={selectedSize || undefined}
+            image={mainImage || product.img || product.imageUrl}
             className={`w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
               !selectedSize ? 'opacity-50 cursor-not-allowed' : ''
             }`}

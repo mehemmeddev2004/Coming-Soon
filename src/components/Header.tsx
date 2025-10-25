@@ -153,10 +153,11 @@ const Header = () => {
               )}
 
               {/* Bag Menu */}
-              {item.id === "4" && bagBoxOpen && (
-                <div className="absolute right-0 mt-2 z-50">
-                  <BagMenu />
-                </div>
+              {item.id === "4" && (
+                <BagMenu 
+                  isOpen={bagBoxOpen}
+                  onToggle={() => setBagBoxOpen(prev => !prev)}
+                />
               )}
             </div>
           ))}

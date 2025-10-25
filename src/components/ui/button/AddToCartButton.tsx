@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartProvider";
 
 type Props = {
@@ -10,6 +11,22 @@ type Props = {
   className?: string;
   children?: React.ReactNode;
   disabled?: boolean;
+  size?: string;
+  color?: string;
+  image?: string;
+  stock?: number;
+  specs?: {
+    id: number;
+    key: string;
+    name: string;
+    productId: number;
+    values: {
+      id: number;
+      key: string;
+      value: string;
+      productSpecId: number;
+    }[];
+  }[];
 };
 
 const AddToCartButton: React.FC<Props> = ({ 
@@ -18,16 +35,38 @@ const AddToCartButton: React.FC<Props> = ({
   price, 
   className, 
   children,
-  disabled = false 
+  disabled = false,
+  size,
+  color,
+  image,
+  stock,
+  specs
 }) => {
   const { addItem } = useCart();
+  const router = useRouter();
 
   const onClick = () => {
+    // Login yoxlaması
+    const user = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (!user || !token || user === "undefined" || user === "null") {
+      // İstifadəçi login olmayıb - login səhifəsinə yönləndir
+      router.push("/login");
+      return;
+    }
+
+    // İstifadəçi login olub - məhsulu səbətə əlavə et
     addItem({
       id,
       name,
       price: typeof price === "string" ? parseFloat(price) : price,
-      quantity: 1
+      quantity: 1,
+      size,
+      color,
+      image,
+      stock,
+      specs
     });
   };
 
