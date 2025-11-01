@@ -35,12 +35,9 @@ interface ProductFormProps {
   onSubmit: (data: {
     product: {
       name: string
-      slug: string
       description: string
       img: string
       images?: string
-      price: number
-      stock: number
       category: string
     }
     specs: Spec[]
@@ -48,20 +45,14 @@ interface ProductFormProps {
   }) => Promise<boolean>
   newProduct: {
     name: string
-    slug: string
     description: string
     img: string
-    price: number
-    stock: number
     category: string
   }
   setNewProduct: React.Dispatch<React.SetStateAction<{
     name: string
-    slug: string
     description: string
     img: string
-    price: number
-    stock: number
     category: string
   }>>
   categories: category[]
@@ -168,60 +159,80 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
   }
   
  const handleSubmit = async () => {
-  if (isUploading) return // Prevent double submission
+    if (isUploading) return
 
-  // Validate required fields
-  if (!newProduct.name.trim()) {
-    setMessage({ type: 'error', text: 'Məhsul adı məcburidir!' })
-    return
-  }
-  if (!newProduct.price || newProduct.price <= 0) {
-    setMessage({ type: 'error', text: 'Düzgün qiymət daxil edin!' })
-    return
-  }
-  if (!newProduct.category) {
-    setMessage({ type: 'error', text: 'Kateqoriya seçin!' })
-    return
-  }
-
-  setIsUploading(true)
-  setMessage(null)
-
-  try {
-    console.log("Göndərilən məhsul:", {
-      ...newProduct,
-      specs: productSpecs,
-      variants: productVariants
-    })
-
-    // 👇 Artıq məlumatları `onSubmit`-ə göndəririk
-    const success = await onSubmit({
-      product: {
-        ...newProduct,
-        images: additionalImages.length > 0 ? JSON.stringify(additionalImages) : undefined
-      },
-      specs: productSpecs,
-      variants: productVariants
-    })
-
-    if (success) {
-      setMessage({ type: 'success', text: 'Məhsul uğurla əlavə edildi!' })
-      // Reset additional images
-      setAdditionalImages([])
-      setTimeout(() => {
-        onClose()
-        setMessage(null)
-      }, 2000)
-    } else {
-      setMessage({ type: 'error', text: 'Məhsul əlavə edilərkən xəta baş verdi!' })
+    // Validate required fields
+    if (!newProduct.name.trim()) {
+      setMessage({ type: 'error', text: 'Məhsul adı məcburidir!' })
+      return
     }
-  } catch (error) {
-    console.error(error)
-    setMessage({ type: 'error', text: 'Məhsul əlavə edilərkən xəta baş verdi!' })
-  } finally {
-    setIsUploading(false)
+    if (!newProduct.img) {
+      setMessage({ type: 'error', text: 'Əsas şəkil məcburidir!' })
+      return
+    }
+    if (!newProduct.category) {
+      setMessage({ type: 'error', text: 'Kateqoriya seçin!' })
+      return
+    }
+    if (productVariants.length === 0) {
+      setMessage({ type: 'error', text: 'Ən azı bir variant əlavə edin!' })
+      return
+    }
+
+    // Validate variants
+    const hasInvalidVariant = productVariants.some((variant, index) => {
+      if (!variant.slug || variant.slug.trim() === '') {
+        setMessage({ type: 'error', text: `Variant ${index + 1}: Slug boş ola bilməz` })
+        return true
+      }
+      if (!variant.price || variant.price <= 0) {
+        setMessage({ type: 'error', text: `Variant ${index + 1}: Qiymət düzgün deyil` })
+        return true
+      }
+      if (!variant.stock || variant.stock < 0) {
+        setMessage({ type: 'error', text: `Variant ${index + 1}: Stok düzgün deyil` })
+        return true
+      }
+      if (!variant.specs || variant.specs.length === 0) {
+        setMessage({ type: 'error', text: `Variant ${index + 1}: Xüsusiyyətlər əlavə edin` })
+        return true
+      }
+      return false
+    })
+
+    if (hasInvalidVariant) return
+
+    setIsUploading(true)
+    setMessage(null)
+
+    try {
+      const success = await onSubmit({
+        product: {
+          ...newProduct,
+          images: additionalImages.length > 0 ? JSON.stringify(additionalImages) : undefined
+        },
+        specs: productSpecs,
+        variants: productVariants
+      })
+
+      if (success) {
+        setMessage({ type: 'success', text: 'Məhsul uğurla əlavə edildi!' })
+        // Reset additional images
+        setAdditionalImages([])
+        setTimeout(() => {
+          onClose()
+          setMessage(null)
+        }, 2000)
+      } else {
+        setMessage({ type: 'error', text: 'Məhsul əlavə edilərkən xəta baş verdi!' })
+      }
+    } catch (error) {
+      console.error(error)
+      setMessage({ type: 'error', text: 'Məhsul əlavə edilərkən xəta baş verdi!' })
+    } finally {
+      setIsUploading(false)
+    }
   }
-}
 
 
   if (!show) return null
@@ -273,16 +284,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
                 placeholder="Ağ köynək" 
                 value={newProduct.name} 
                 onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-sm sm:text-base" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Slug</label>
-              <input 
-                type="text" 
-                placeholder="ag-koynek" 
-                value={newProduct.slug} 
-                onChange={(e) => setNewProduct({ ...newProduct, slug: e.target.value })} 
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors text-sm sm:text-base" 
               />
             </div>
@@ -466,31 +467,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
             </div>
           </div>
           
-          {/* Price & Stock */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Qiymət (₼) *</label>
-              <input 
-                type="number" 
-                placeholder="25.99" 
-                value={newProduct.price || ''} 
-                onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) || 0 })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" 
-                step="0.01"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Stok miqdarı</label>
-              <input 
-                type="number" 
-                placeholder="100" 
-                value={newProduct.stock || ''} 
-                onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) || 0 })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-colors" 
-              />
-            </div>
-          </div>
-
           {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Kateqoriya *</label>
@@ -510,7 +486,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ show, onClose, onSubmit, newP
           <SpecsForm specs={productSpecs} setSpecs={setProductSpecs} />
 
           {/* Variants Section */}
-          <VariantsForm variants={productVariants} setVariants={setProductVariants} />
+          <VariantsForm 
+            variants={productVariants} 
+            setVariants={setProductVariants}
+            productName={newProduct.name} // Add this prop
+          />
         </div>
         
         {/* Footer */}

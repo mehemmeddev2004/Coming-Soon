@@ -20,73 +20,104 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading or wait for product data
     if (product) {
       setIsLoading(false);
     }
   }, [product]);
 
-
   const tabItems = ['Description', 'Sizing', 'Shipping', 'Returns'];
 
-  // Color mapping for product specs
   const colorMap: Record<string, string> = {
-    'black': '#000000',
-    'white': '#FFFFFF',
-    'red': '#EF4444',
-    'blue': '#3B82F6',
-    'green': '#10B981',
-    'yellow': '#F59E0B',
-    'purple': '#A855F7',
-    'pink': '#EC4899',
-    'gray': '#6B7280',
-    'grey': '#6B7280',
-    'brown': '#92400E',
-    'beige': '#D4C5B9',
-    'navy': '#1E3A8A',
-    'orange': '#F97316',
+    black: '#000000',
+    white: '#FFFFFF',
+    red: '#EF4444',
+    blue: '#3B82F6',
+    green: '#10B981',
+    yellow: '#F59E0B',
+    purple: '#A855F7',
+    pink: '#EC4899',
+    gray: '#6B7280',
+    grey: '#6B7280',
+    brown: '#92400E',
+    beige: '#D4C5B9',
+    navy: '#1E3A8A',
+    orange: '#F97316',
   };
 
   const handleSizeSelect = (size: string) => {
     setSelectedSize(size === selectedSize ? null : size);
   };
 
-  // Loading Screen Component
+  // 🔹 Loading Screen
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-[#332d2d] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-          role="status"
+      <div role="status" className="flex items-center justify-center h-screen bg-black">
+        <svg
+          aria-hidden="true"
+          className="inline w-10 h-10 text-gray-700 animate-spin fill-blue-600"
+          viewBox="0 0 100 101"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
+          <path
+            d="M100 50.5908C100 78.2051 77.6142 100.591 
+            50 100.591C22.3858 100.591 0 78.2051 
+            0 50.5908C0 22.9766 22.3858 0.59082 
+            50 0.59082C77.6142 0.59082 100 22.9766 
+            100 50.5908ZM9.08144 50.5908C9.08144 
+            73.1895 27.4013 91.5094 50 91.5094C72.5987 
+            91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 
+            27.9921 72.5987 9.67226 50 9.67226C27.4013 
+            9.67226 9.08144 27.9921 9.08144 50.5908Z"
+            fill="currentColor"
+          />
+          <path
+            d="M93.9676 39.0409C96.393 
+            38.4038 97.8624 35.9116 97.0079 
+            33.5539C95.2932 28.8227 92.871 
+            24.3692 89.8167 20.348C85.8452 
+            15.1192 80.8826 10.7238 75.2124 
+            7.41289C69.5422 4.10194 63.2754 
+            1.94025 56.7698 1.05124C51.7666 
+            0.367541 46.6976 0.446843 41.7345 
+            1.27873C39.2613 1.69328 37.813 
+            4.19778 38.4501 6.62326C39.0873 
+            9.04874 41.5694 10.4717 44.0505 
+            10.1071C47.8511 9.54855 51.7191 
+            9.52689 55.5402 10.0491C60.8642 
+            10.7766 65.9928 12.5457 70.6331 
+            15.2552C75.2735 17.9648 79.3347 
+            21.5619 82.5849 25.841C84.9175 
+            28.9121 86.7997 32.2913 88.1811 
+            35.8758C89.083 38.2158 91.5421 
+            39.6781 93.9676 39.0409Z"
+            fill="currentFill"
+          />
+        </svg>
+        <span className="sr-only">Loading...</span>
       </div>
     );
   }
 
+  // 🔹 Main Product Content
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="w-full h-[30px] mb-[30px]">
         <p className="text-sm text-gray-600">
-          You are currently viewing: <strong>{currentSlug}</strong> 
+          You are currently viewing: <strong>{currentSlug}</strong>
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Product Gallery */}
         <div className="w-full">
-          <ProductGallery 
-            product={product} 
-            galleryImages={galleryImages} 
-            mainImage={mainImage} 
-          />
+          <ProductGallery product={product} galleryImages={galleryImages} mainImage={mainImage} />
         </div>
 
+        {/* Product Details */}
         <div className="flex flex-col space-y-6">
           <div>
-            <h1 className=" mb-[5px] font-[Georgia,serif] text-[1rem] font-normal tracking-[.05em] leading-[1.333em] md:text-[1.125rem]">
+            <h1 className="mb-[5px] font-[Georgia,serif] text-[1rem] md:text-[1.125rem] font-normal tracking-[.05em] leading-[1.333em]">
               {product.name}
             </h1>
             <p className="text-[13px] text-gray-600">
@@ -95,103 +126,92 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
                 : product.price}
             </p>
           </div>
-          <span className='w-full h-[1px] bg-gray-300'></span>
+
+          <span className="w-full h-[1px] bg-gray-300"></span>
+
+          {/* Colors */}
           {product.specs && product.specs.length > 0 && (
             <div>
-              {/* Display only color specs */}
-              {product.specs.filter(spec => spec.key === 'color').map((spec) => {
-                // Split color values if they contain commas (e.g., "red,blue" -> ["red", "blue"])
-                const colors: string[] = [];
-                spec.values?.forEach((value) => {
-                  const colorValue = value.value || '';
-                  // Split by comma and filter out empty strings
-                  const splitColors = colorValue.split(',').map(c => c.trim()).filter(c => c.length > 0);
-                  colors.push(...splitColors);
-                });
+              {product.specs
+                .filter((spec) => spec.key === 'color')
+                .map((spec) => {
+                  const colors: string[] = [];
+                  spec.values?.forEach((value) => {
+                    const splitColors = (value.value || '')
+                      .split(',')
+                      .map((c) => c.trim())
+                      .filter(Boolean);
+                    colors.push(...splitColors);
+                  });
 
-                return (
-                  <div key={spec.id}>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {colors.map((color, idx) => (
-                        <span
-                          key={`${spec.id}-${idx}`}
-                          className="text-[13px] uppercase text-gray-600"
-                        >
-                          {spec.name.toUpperCase()}: {color}
-                        </span>
-                      ))}
+                  return (
+                    <div key={spec.id}>
+                      <div className="flex gap-1.5 bg-white/90 backdrop-blur-sm p-[2px] rounded-full shadow-inner w-fit">
+                        <span className="text-[13px] text-gray-600">COLOR:</span>
+                        {colors.slice(0, 4).map((color, idx) => {
+                          const colorKey = color.toLowerCase();
+                          const bgColor = colorMap[colorKey] ?? colorKey ?? '#f3f4f6';
+                          return (
+                            <span
+                              key={`${spec.id}-color-${idx}`}
+                              className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform duration-200 cursor-pointer"
+                              style={{ backgroundColor: bgColor }}
+                              title={color}
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="flex gap-1.5 bg-white/90 backdrop-blur-sm p-[2px] rounded-full shadow-inner w-fit">
-                      {colors.slice(0, 4).map((color, idx) => {
-                        const colorKey = color.toLowerCase()
-                        const bgColor = colorMap[colorKey] ?? color.toLowerCase() ?? "#f3f4f6"
-
-                        return (
-                          <span
-                            key={`${spec.id}-color-${idx}`}
-                            className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform duration-200 cursor-pointer"
-                            style={{ backgroundColor: bgColor }}
-                            title={color}
-                          />
-                        )
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
-  <span className='w-full h-[1px] bg-gray-300'></span>
+
+          <span className="w-full h-[1px] bg-gray-300"></span>
+
+          {/* Sizes */}
           <div>
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-medium text-gray-900">Select a size</h3>
-            </div>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Select a size</h3>
             <div className="grid grid-cols-3 gap-2">
               {(() => {
-                // Get sizes from specs first, fallback to product.sizes
-                const sizeSpec = product.specs?.find(spec => spec.key === 'size');
+                const sizeSpec = product.specs?.find((spec) => spec.key === 'size');
                 const sizeValues = sizeSpec?.values || product.sizes || [];
-                
-                // Split size values if they contain spaces (e.g., "28 30 32" -> ["28", "30", "32"])
                 const sizes: string[] = [];
                 sizeValues.forEach((size) => {
-                  const sizeValue = typeof size === 'string' ? size : size.value;
-                  // Split by spaces and filter out empty strings
-                  const splitSizes = sizeValue.trim().split(/\s+/).filter(s => s.length > 0);
-                  sizes.push(...splitSizes);
+                  const value = typeof size === 'string' ? size : size.value;
+                  sizes.push(...value.trim().split(/\s+/));
                 });
-                
+
                 if (sizes.length > 0) {
-                  return sizes.map((sizeValue, index) => {
-                    return (
-                      <button
-                        key={`${sizeValue}-${index}`}
-                        type="button"
-                        onClick={() => handleSizeSelect(sizeValue)}
-                        className={`h-12 px-4 border rounded-md text-sm font-medium transition-colors ${
-                          selectedSize === sizeValue
-                            ? 'bg-black text-white border-black'
-                            : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
-                        }`}
-                      >
-                        {sizeValue}
-                      </button>
-                    );
-                  });
+                  return sizes.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleSizeSelect(s)}
+                      className={`h-12 px-4 border rounded-md text-sm font-medium transition-colors ${
+                        selectedSize === s
+                          ? 'bg-black text-white border-black'
+                          : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ));
                 }
                 return <p className="col-span-3 text-sm text-gray-500">No sizes available</p>;
               })()}
             </div>
           </div>
 
+          {/* Add to Cart */}
           <AddToCartButton
             id={String(product.id)}
             name={product.name}
-            price={typeof product.price === 'string' && !product.price.startsWith('AZN')
-              ? parseFloat(product.price)
-              : typeof product.price === 'string'
+            price={
+              typeof product.price === 'string'
                 ? parseFloat(product.price.replace(/[^0-9.,]/g, ''))
-                : product.price}
+                : product.price
+            }
             size={selectedSize || undefined}
             color={product.specs?.[0]?.values?.[0]?.value}
             specs={product.specs}
@@ -204,6 +224,7 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
             {selectedSize ? 'Add To Cart' : 'Select a size'}
           </AddToCartButton>
 
+          {/* Tabs */}
           <div className="pt-6">
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex space-x-8">
@@ -228,7 +249,7 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
                 <div className="prose max-w-none">
                   {product.description ? (
                     Array.isArray(product.description) ? (
-                      <ul className="">
+                      <ul>
                         {product.description.map((line, idx) => (
                           <li key={idx}>{line}</li>
                         ))}
@@ -248,8 +269,10 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
           </div>
         </div>
       </div>
-      <div>
-        <RandomProduct/>
+
+      {/* Random Product Section */}
+      <div className="mt-10">
+        <RandomProduct />
       </div>
     </div>
   );

@@ -8,6 +8,9 @@ const config: Config = {
     "./src/utils/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/hooks/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    'animate-spin', // 🔹 Spinner animasyonunun silinmesini önler
+  ],
   theme: {
     extend: {
       colors: {
@@ -18,4 +21,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;
