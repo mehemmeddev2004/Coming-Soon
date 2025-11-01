@@ -113,35 +113,10 @@ const BagMenu: React.FC<BagMenuProps> = ({ onToggle, isOpen }) => {
                       {item.color && (
                         <div className="flex items-center gap-2 text-gray-600 text-xs md:text-[13px]">
                           <span>Color: {item.color}</span>
-                          <span
-                            className="w-4 h-4 md:w-5 md:h-5 rounded-full border border-gray-300"
-                            style={{
-                              backgroundColor:
-                                colorMap[item.color.toLowerCase?.() ?? ""] ?? item.color.toLowerCase?.() ?? "#f3f4f6",
-                            }}
-                            title={item.color}
-                          />
+                        
                         </div>
                       )}
 
-                      {item.specs && Array.isArray(item.specs) && (
-                        <div className="flex gap-1.5 p-[2px] rounded-full mt-2">
-                          {item.specs.flatMap((spec, specIndex) =>
-                            spec?.values?.slice(0, 4).map((v, valIndex) => {
-                              const colorKey = v.value?.toLowerCase() ?? ""
-                              const bgColor = colorMap[colorKey] ?? "#f3f4f6"
-                              return (
-                                <span
-                                  key={v?.id ?? `${specIndex}-${valIndex}`}
-                                  className="w-5 h-5 md:w-6 md:h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform duration-200 cursor-pointer"
-                                  style={{ backgroundColor: bgColor }}
-                                  title={v?.value || "Color option"}
-                                />
-                              )
-                            }),
-                          )}
-                        </div>
-                      )}
                     </div>
 
                     <div className="text-gray-600 text-xs md:text-[13px] flex items-center gap-2 md:gap-3 mt-2">

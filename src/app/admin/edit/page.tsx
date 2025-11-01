@@ -1,9 +1,11 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { getProducts, updateProduct } from '@/utils/fetchProducts'
+import { getProducts, updateProduct, createProductSpecs, createProductVariants } from '@/utils/fetchProducts'
 import { fetchCategories } from '@/utils/fetchCategories'
 import { Product } from '@/types/product'
 import { category } from '@/types/category'
+import SpecsForm from '@/components/admin/SpecsForm'
+import VariantsForm from '@/components/admin/VariantsForm'
 
 const EditPage = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -22,6 +24,9 @@ const EditPage = () => {
     img: '',
     isActive: true
   })
+
+  const [productSpecs, setProductSpecs] = useState<any[]>([{ key: "", name: "", values: [{ key: "", value: "" }] }])
+  const [productVariants, setProductVariants] = useState<any[]>([{ slug: "", price: 0, stock: 0, discount: 0, images: [], specs: [] }])
 
   useEffect(() => {
     fetchData()
@@ -54,6 +59,32 @@ const EditPage = () => {
       img: product.img || '',
       isActive: product.isActive ?? true
     })
+    
+    // Load specs if available
+    if (product.specs && product.specs.length > 0) {
+      setProductSpecs(product.specs.map(spec => ({
+        key: spec.key || '',
+        name: spec.name || '',
+        values: spec.values?.map(v => ({ key: v.key || '', value: v.value || '' })) || [{ key: '', value: '' }]
+      })))
+    } else {
+      setProductSpecs([{ key: "", name: "", values: [{ key: "", value: "" }] }])
+    }
+    
+    // Load variants if available
+    if (product.variants && product.variants.length > 0) {
+      setProductVariants(product.variants.map(variant => ({
+        slug: variant.slug || '',
+        price: variant.price || 0,
+        stock: variant.stock || 0,
+        discount: variant.discount || 0,
+        images: variant.images || [],
+        specs: variant.specs || []
+      })))
+    } else {
+      setProductVariants([{ slug: "", price: 0, stock: 0, discount: 0, images: [], specs: [] }])
+    }
+    
     setShowEditForm(true)
   }
 
@@ -63,18 +94,80 @@ const EditPage = () => {
 
     try {
       setLoading(true)
+      
+      // Backend doesn't want categoryId on update, and requires slug
+      // Description must be array with at least 3 characters per item
+      let descriptionArray: string[] = []
+      
+      if (Array.isArray(formData.description)) {
+        // If already array, use it
+        descriptionArray = formData.description.filter((item: any) => 
+          typeof item === 'string' && item.trim().length >= 3
+        )
+      } else if (typeof formData.description === 'string') {
+        // If string, convert to array
+        const descriptionText = formData.description.trim()
+        if (descriptionText.length >= 3) {
+          descriptionArray = [descriptionText]
+        }
+      }
+      
+      // Ensure at least one valid description
+      if (descriptionArray.length === 0) {
+        descriptionArray = ['Məhsul təsviri']
+      }
+      
       const updateData = {
-        ...formData,
+        name: formData.name,
+        slug: editingProduct.slug, // Keep existing slug
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
-        categoryId: parseInt(formData.categoryId)
+        description: descriptionArray, // Must be array with items >= 3 chars
+        img: formData.img,
+        isActive: formData.isActive
+        // Don't send categoryId on update
       }
 
-      await updateProduct(editingProduct.id, updateData)
-      await fetchData() // Refresh data
-      setShowEditForm(false)
-      setEditingProduct(null)
-      alert('Məhsul uğurla yeniləndi!')
+      // Update basic product info
+      const result = await updateProduct(editingProduct.id, updateData as any)
+      
+      if (result) {
+        // Update specs if they exist
+        const validSpecs = productSpecs.filter(spec => 
+          spec.key.trim() && spec.name.trim() && spec.values.length > 0
+        ).map(spec => ({
+          key: spec.key.trim(),
+          name: spec.name.trim(),
+          values: spec.values.filter((val: any) => val.key.trim() && val.value.trim())
+        }))
+        
+        if (validSpecs.length > 0) {
+          await createProductSpecs(Number(editingProduct.id), { specs: validSpecs })
+        }
+        
+        // Update variants if they exist
+        const validVariants = productVariants.filter(variant => 
+          variant.slug.trim() && variant.price > 0 && variant.stock >= 0
+        ).map(variant => ({
+          slug: variant.slug.trim(),
+          price: variant.price,
+          stock: variant.stock,
+          discount: variant.discount,
+          images: variant.images || [],
+          specs: variant.specs.filter((spec: any) => spec.key.trim() && spec.value.trim())
+        }))
+        
+        if (validVariants.length > 0) {
+          await createProductVariants(Number(editingProduct.id), { variants: validVariants })
+        }
+        
+        await fetchData() // Refresh data
+        setShowEditForm(false)
+        setEditingProduct(null)
+        alert('Məhsul uğurla yeniləndi!')
+      } else {
+        alert('Məhsul yenilənərkən xəta baş verdi!')
+      }
     } catch (error) {
       console.error('Error updating product:', error)
       alert('Məhsul yenilənərkən xəta baş verdi!')
@@ -95,6 +188,8 @@ const EditPage = () => {
       img: '',
       isActive: true
     })
+    setProductSpecs([{ key: "", name: "", values: [{ key: "", value: "" }] }])
+    setProductVariants([{ slug: "", price: 0, stock: 0, discount: 0, images: [], specs: [] }])
   }
 
   if (loading && products.length === 0) {
@@ -296,6 +391,12 @@ const EditPage = () => {
                     Məhsul aktiv
                   </label>
                 </div>
+
+                {/* Specs Section */}
+                <SpecsForm specs={productSpecs} setSpecs={setProductSpecs} />
+
+                {/* Variants Section */}
+                <VariantsForm variants={productVariants} setVariants={setProductVariants} />
 
                 {/* Buttons */}
                 <div className="flex gap-3 pt-4">

@@ -88,6 +88,42 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
+    console.log('📤 PUT request body:', body);
+    
+    // Normalize description to array format (backend requirement)
+    let descriptionArray: string[] = []
+    
+    if (Array.isArray(body?.description)) {
+      // If already array, filter items with at least 3 chars
+      descriptionArray = body.description.filter((item: any) => 
+        typeof item === 'string' && item.trim().length >= 3
+      )
+    } else if (body?.description) {
+      // If string, convert to array if >= 3 chars
+      const desc = String(body.description).trim()
+      if (desc.length >= 3) {
+        descriptionArray = [desc]
+      }
+    }
+    
+    // Ensure at least one valid description
+    if (descriptionArray.length === 0) {
+      descriptionArray = ['Məhsul təsviri']
+    }
+
+    console.log('🔍 Final description array:', descriptionArray)
+    console.log('🔍 Description array items:')
+    descriptionArray.forEach((item, idx) => {
+      console.log(`  [${idx}]: "${item}" (length: ${item.length})`)
+    })
+
+    const normalizedBody = {
+      ...body,
+      description: descriptionArray,
+    }
+
+    console.log('📦 Normalized body:', normalizedBody)
+    console.log('📦 Normalized body description:', normalizedBody.description);
     
     // Forward authorization header if present
     const authHeader = request.headers.get('authorization');
@@ -104,7 +140,7 @@ export async function PUT(
     const response = await fetch(`https://etor.onrender.com/api/products/${id}`, {
       method: 'PUT',
       headers,
-      body: JSON.stringify(body),
+      body: JSON.stringify(normalizedBody),
     });
 
 

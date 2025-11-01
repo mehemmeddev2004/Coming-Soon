@@ -98,38 +98,47 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
           <span className='w-full h-[1px] bg-gray-300'></span>
           {product.specs && product.specs.length > 0 && (
             <div>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {product.specs.flatMap((spec) =>
-                  spec.values?.map((value) => (
-                    <span
-                      key={`${spec.id}-${value.id}`}
-                      className="text-[13px] uppercase text-gray-600"
-                    >
-                      COLOR: {value.value}
-                    </span>
-                  ))
-                )}
-              </div>
-              <div className="flex gap-1.5 bg-white/90 backdrop-blur-sm p-[2px] rounded-full shadow-inner w-fit">
-                {product.specs.map((spec, specIndex) =>
-                  spec?.values && Array.isArray(spec.values)
-                    ? spec.values.slice(0, 4).map((v, valIndex) => {
-                        const colorKey = v.value?.toLowerCase() ?? ""
-                        const bgColor =
-                          colorMap[colorKey] ?? v.value?.toLowerCase() ?? "#f3f4f6"
+              {/* Display only color specs */}
+              {product.specs.filter(spec => spec.key === 'color').map((spec) => {
+                // Split color values if they contain commas (e.g., "red,blue" -> ["red", "blue"])
+                const colors: string[] = [];
+                spec.values?.forEach((value) => {
+                  const colorValue = value.value || '';
+                  // Split by comma and filter out empty strings
+                  const splitColors = colorValue.split(',').map(c => c.trim()).filter(c => c.length > 0);
+                  colors.push(...splitColors);
+                });
+
+                return (
+                  <div key={spec.id}>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {colors.map((color, idx) => (
+                        <span
+                          key={`${spec.id}-${idx}`}
+                          className="text-[13px] uppercase text-gray-600"
+                        >
+                          {spec.name.toUpperCase()}: {color}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-1.5 bg-white/90 backdrop-blur-sm p-[2px] rounded-full shadow-inner w-fit">
+                      {colors.slice(0, 4).map((color, idx) => {
+                        const colorKey = color.toLowerCase()
+                        const bgColor = colorMap[colorKey] ?? color.toLowerCase() ?? "#f3f4f6"
 
                         return (
                           <span
-                            key={v?.id ?? `${specIndex}-${valIndex}`}
+                            key={`${spec.id}-color-${idx}`}
                             className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform duration-200 cursor-pointer"
                             style={{ backgroundColor: bgColor }}
-                            title={v?.value || "Color option"}
+                            title={color}
                           />
                         )
-                      })
-                    : null
-                )}
-              </div>
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
   <span className='w-full h-[1px] bg-gray-300'></span>
@@ -138,29 +147,40 @@ export default function ProductContent({ product, galleryImages, mainImage }: Pr
               <h3 className="text-sm font-medium text-gray-900">Select a size</h3>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {product.sizes && product.sizes.length > 0 ? (
-                product.sizes.map((size, index) => {
+              {(() => {
+                // Get sizes from specs first, fallback to product.sizes
+                const sizeSpec = product.specs?.find(spec => spec.key === 'size');
+                const sizeValues = sizeSpec?.values || product.sizes || [];
+                
+                // Split size values if they contain spaces (e.g., "28 30 32" -> ["28", "30", "32"])
+                const sizes: string[] = [];
+                sizeValues.forEach((size) => {
                   const sizeValue = typeof size === 'string' ? size : size.value;
-                  const sizeKey = typeof size === 'string' ? size : size.id;
-                  
-                  return (
-                    <button
-                      key={sizeKey || index}
-                      type="button"
-                      onClick={() => handleSizeSelect(sizeValue)}
-                      className={`h-12 px-4 border rounded-md text-sm font-medium transition-colors ${
-                        selectedSize === sizeValue
-                          ? 'bg-black text-white border-black'
-                          : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
-                      }`}
-                    >
-                      {sizeValue}
-                    </button>
-                  );
-                })
-              ) : (
-                <p className="col-span-3 text-sm text-gray-500">No sizes available</p>
-              )}
+                  // Split by spaces and filter out empty strings
+                  const splitSizes = sizeValue.trim().split(/\s+/).filter(s => s.length > 0);
+                  sizes.push(...splitSizes);
+                });
+                
+                if (sizes.length > 0) {
+                  return sizes.map((sizeValue, index) => {
+                    return (
+                      <button
+                        key={`${sizeValue}-${index}`}
+                        type="button"
+                        onClick={() => handleSizeSelect(sizeValue)}
+                        className={`h-12 px-4 border rounded-md text-sm font-medium transition-colors ${
+                          selectedSize === sizeValue
+                            ? 'bg-black text-white border-black'
+                            : 'border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50'
+                        }`}
+                      >
+                        {sizeValue}
+                      </button>
+                    );
+                  });
+                }
+                return <p className="col-span-3 text-sm text-gray-500">No sizes available</p>;
+              })()}
             </div>
           </div>
 

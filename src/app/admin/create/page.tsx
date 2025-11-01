@@ -1,9 +1,11 @@
 "use client"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useCategory } from "@/hooks/useCategory"
 import { useProduct } from "@/hooks/useProduct"
 import CategoryForm from "@/components/admin/CategoryForm"
 import ProductForm from "@/components/admin/ProductForm"
+import { updateProduct } from "@/utils/fetchProducts"
+import { Product } from "@/types/product"
 
 const Page = () => {
   // Custom hooks
@@ -31,6 +33,10 @@ const Page = () => {
     handleAddProduct
   } = useProduct()
 
+  // Edit state
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,9 +61,118 @@ const Page = () => {
     console.log("📊 Categories count in component:", categories.length)
   }, [categories])
 
+  // Handle edit click
+  const handleEditClick = (product: Product) => {
+    setEditingProduct(product)
+    setIsEditMode(true)
+    
+    // Set form data
+    setNewProduct({
+      name: product.name || '',
+      slug: product.slug || '',
+      description: product.description || '',
+      img: product.img || '',
+      price: typeof product.price === 'number' ? product.price : parseFloat(product.price as string) || 0,
+      stock: product.stock || 0,
+      category: product.category?.name || ''
+    })
+    
+    // Load specs if available
+    if (product.specs && product.specs.length > 0) {
+      setProductSpecs(product.specs.map(spec => ({
+        key: spec.key || '',
+        name: spec.name || '',
+        values: spec.values?.map(v => ({ key: v.key || '', value: v.value || '' })) || [{ key: '', value: '' }]
+      })))
+    }
+    
+    // Load variants if available
+    if (product.variants && product.variants.length > 0) {
+      setProductVariants(product.variants.map(variant => ({
+        slug: variant.slug || '',
+        price: variant.price || 0,
+        stock: variant.stock || 0,
+        discount: variant.discount || 0,
+        images: variant.images || [],
+        specs: variant.specs || []
+      })))
+    }
+    
+    setShowProductForm(true)
+  }
+
   // Wrapper function for handleAddProduct to pass categories
   const handleProductSubmit = async (data: any) => {
-    return await handleAddProduct(categories, data)
+    if (isEditMode && editingProduct) {
+      // Update existing product
+      try {
+        console.log('📤 Update data being sent:', data)
+        console.log('🔍 Editing product:', editingProduct)
+        
+        // Backend doesn't want categoryId on update, and requires slug
+        // Description must be array with at least 3 characters per item
+        let descriptionArray: string[] = []
+        
+        if (Array.isArray(data.product.description)) {
+          // If already array, use it
+          descriptionArray = data.product.description.filter((item: any) => 
+            typeof item === 'string' && item.trim().length >= 3
+          )
+        } else if (typeof data.product.description === 'string') {
+          // If string, convert to array
+          const descriptionText = data.product.description.trim()
+          if (descriptionText.length >= 3) {
+            descriptionArray = [descriptionText]
+          }
+        }
+        
+        // Ensure at least one valid description
+        if (descriptionArray.length === 0) {
+          descriptionArray = ['Məhsul təsviri']
+        }
+        
+        console.log('🔍 Description array before sending:', descriptionArray)
+        console.log('🔍 Description array length:', descriptionArray.length)
+        console.log('🔍 First item:', descriptionArray[0])
+        console.log('🔍 First item length:', descriptionArray[0]?.length)
+        
+        const updateData = {
+          name: data.product.name,
+          slug: data.product.slug || editingProduct.slug, // Keep existing slug or use new one
+          price: Number(data.product.price),
+          stock: Number(data.product.stock),
+          description: descriptionArray, // Must be array with items >= 3 chars
+          img: data.product.img
+          // Don't send categoryId on update
+        }
+        
+        console.log('📦 Final update payload:', updateData)
+        console.log('📦 Update payload description:', updateData.description)
+        
+        const result = await updateProduct(editingProduct.id, updateData as any)
+        if (result) {
+          await loadProducts()
+          setShowProductForm(false)
+          setIsEditMode(false)
+          setEditingProduct(null)
+          return true
+        }
+        return false
+      } catch (error) {
+        console.error('Error updating product:', error)
+        return false
+      }
+    } else {
+      // Create new product
+      return await handleAddProduct(categories, data)
+    }
+  }
+
+  // Handle form close
+  const handleFormClose = () => {
+    setShowProductForm(false)
+    setIsEditMode(false)
+    setEditingProduct(null)
   }
 
   return (
@@ -160,7 +275,10 @@ const Page = () => {
                     </div>
                     
                     <div className="flex gap-2">
-                      <button className="flex-1 px-3 py-2 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                      <button 
+                        onClick={() => handleEditClick(product)}
+                        className="flex-1 px-3 py-2 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
                         Redaktə
                       </button>
                     </div>
@@ -186,7 +304,7 @@ const Page = () => {
       {/* Product Modal */}
       <ProductForm
         show={showProductForm}
-        onClose={() => setShowProductForm(false)}
+        onClose={handleFormClose}
         onSubmit={handleProductSubmit}
         newProduct={newProduct}
         setNewProduct={setNewProduct}

@@ -45,7 +45,12 @@ const getAuthHeaders = (): Record<string, string> => {
   const headers: Record<string, string> = { "Content-Type": "application/json" }
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token")
-    if (token) headers["Authorization"] = `Bearer ${token}`
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`
+      console.log("🔑 Auth token found:", token.substring(0, 20) + "...")
+    } else {
+      console.warn("⚠️ No auth token found in localStorage")
+    }
   }
   return headers
 }
@@ -154,17 +159,46 @@ export const createProduct = async (data: CreateProductData): Promise<Product | 
     const url = `/api/products/category/${data.categoryId}`
     const { categoryId: _, specs: __, variants: ___, ...body } = data
 
+    // Ensure backend-required shape: description must be an array
+    const descriptionArray = Array.isArray(body.description)
+      ? body.description
+      : body.description
+      ? [String(body.description).trim()]
+      : []
+
+    const normalizedBody = {
+      ...body,
+      description: descriptionArray,
+    }
+
+    console.log("🔄 Sending POST request to:", url)
+    console.log("📦 Request body:", normalizedBody)
+    console.log("🔑 Headers:", getAuthHeaders())
+
     const response = await fetch(url, {
       method: "POST",
       headers: getAuthHeaders(),
-      body: JSON.stringify(body),
+      body: JSON.stringify(normalizedBody),
     })
 
+    console.log("📥 Response status:", response.status, response.statusText)
+
     if (!response.ok) {
-      throw new Error(`Failed to create product: ${response.status}`)
+      const raw = await response.text()
+      let parsed: any = null
+      try { parsed = JSON.parse(raw) } catch {}
+      console.error("❌ Backend error while creating product:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: parsed ?? raw?.slice(0, 300)
+      })
+      const msg = parsed?.message || `Failed to create product: ${response.status}`
+      throw new Error(Array.isArray(msg) ? msg.join(", ") : String(msg))
     }
 
-    return await response.json()
+    const result = await response.json()
+    console.log("✅ Product created successfully:", result)
+    return result
   } catch (err) {
     console.error("❌ Məhsul əlavə olunmadı:", err)
     return null
@@ -183,21 +217,30 @@ export const createProductSpecs = async (
     const headers = getAuthHeaders()
     const results = []
 
+    console.log(`🔄 Creating ${specs.length} specs for product ${productId}`)
+
     for (const spec of specs) {
+      console.log("📤 Sending spec:", spec)
       const response = await fetch(url, {
         method: "POST",
         headers,
         body: JSON.stringify(spec),
       })
 
+      console.log(`📥 Spec response status: ${response.status}`)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`❌ Spec creation failed: ${response.status}`, errorText)
         throw new Error(`Failed to create spec: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log("✅ Spec created:", data)
       results.push(data)
     }
 
+    console.log(`✅ All ${results.length} specs created successfully`)
     return results
   } catch (err) {
     console.error("❌ Specs əlavə olunmadı:", err)
@@ -244,17 +287,34 @@ export const createProductVariants = async (
 ===================================================== */
 export const updateProduct = async (id: string | number, data: Partial<Product>) => {
   try {
+    console.log(`🔄 Updating product ${id} with data:`, data)
+    
     const response = await fetch(`${BASE_URL}/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     })
 
+    console.log(`📥 Update response status: ${response.status}`)
+
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`❌ Update failed with status ${response.status}:`, errorText)
+      
+      let errorData
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { message: errorText }
+      }
+      
+      console.error('❌ Error details:', errorData)
       throw new Error(`Failed to update product: ${response.status}`)
     }
 
-    return await response.json()
+    const result = await response.json()
+    console.log('✅ Update successful:', result)
+    return result
   } catch (err) {
     console.error(`❌ Failed to update product ${id}:`, err)
     return null

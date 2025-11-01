@@ -27,10 +27,22 @@ export async function POST(
       headers['Authorization'] = authHeader;
     }
     
+    // Ensure backend-required shape: description must be an array
+    const descriptionArray = Array.isArray(body?.description)
+      ? body.description
+      : body?.description
+      ? [String(body.description).trim()]
+      : []
+
+    const normalizedBody = {
+      ...body,
+      description: descriptionArray,
+    }
+
     const response = await fetch(`${BACKEND_URL}/category/${categoryId}`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(body),
+      body: JSON.stringify(normalizedBody),
     });
 
     console.log('📥 Backend response status:', response.status);
@@ -41,7 +53,11 @@ export async function POST(
     let data;
     try {
       data = JSON.parse(responseText);
-      console.log('✅ Product created:', data);
+      if (response.ok) {
+        console.log('✅ Product created:', data);
+      } else {
+        console.log('❌ Backend returned error JSON:', data);
+      }
     } catch (parseError) {
       console.error('❌ Failed to parse JSON:', parseError);
       return NextResponse.json(

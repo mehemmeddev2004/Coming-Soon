@@ -75,7 +75,7 @@ const Kampaniya = () => {
                 playsInline
                 disablePictureInPicture
                 {...({ controlsList: "nodownload nofullscreen noremoteplayback" } as any)}
-                className="w-full object-cover h-[780px] sm:h-[900px] md:h-[900px] lg:h-[100vh]"
+                className="w-full  h-[780px] sm:h-[900px] md:h-[900px] lg:h-[100vh]"
                 style={{ pointerEvents: "none" }}
               >
                 <source src={item.url} type="video/mp4" />
@@ -93,9 +93,9 @@ const Kampaniya = () => {
                 className="
                   absolute inset-0
                   flex flex-col items-start justify-center
-                  text-gray-600 pointer-events-none
+                  text-balck pointer-events-none
                   px-6 sm:px-10 md:px-20 lg:px-24
-                  top-32
+                  top-[450px]
                   max-[991px]:items-center
                   max-[991px]:justify-center
                   max-[991px]:px-4
@@ -105,12 +105,12 @@ const Kampaniya = () => {
                 "
               >
                 <div className="w-full max-w-[970px] space-y-4 sm:space-y-6 md:space-y-8 flex flex-col items-start max-[991px]:items-center">
-                  <h2 className="font-bold leading-tight sm:leading-snug tracking-wide sm:tracking-wider md:tracking-[0.15em] uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl max-[991px]:text-center">
+                  <h2 className="font-bold w-[500px] leading-tight sm:leading-snug tracking-wide sm:tracking-wider md:tracking-[0.15em] uppercase text-[50px] max-[991px]:text-center">
                     <BlurText
                       text={item.title}
                       delay={150}
                       animateBy="words"
-                      direction="top"
+                      direction="bottom"
                       onAnimationComplete={handleAnimationComplete}
                       className="inline-block"
                     />
